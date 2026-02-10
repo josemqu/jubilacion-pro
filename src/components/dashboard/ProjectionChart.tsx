@@ -34,12 +34,16 @@ export function ProjectionChart({ data, retirementAge }: ProjectionChartProps) {
         <ComposedChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="colorReserva" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
               <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
             </linearGradient>
             <linearGradient id="colorCaja" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+              <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
               <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+            </linearGradient>
+            <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#f8fafc" stopOpacity={0.1}/>
+              <stop offset="95%" stopColor="#f8fafc" stopOpacity={0}/>
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} opacity={0.5} />
@@ -60,8 +64,14 @@ export function ProjectionChart({ data, retirementAge }: ProjectionChartProps) {
             tick={{ fill: '#64748b' }}
           />
           <Tooltip 
-            contentStyle={{ backgroundColor: "rgba(15, 23, 42, 0.95)", border: "1px solid #334155", borderRadius: "16px", backdropFilter: "blur(8px)", boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.5)" }}
-            itemStyle={{ fontSize: "12px", padding: "4px 0" }}
+            contentStyle={{ 
+              backgroundColor: "rgba(15, 23, 42, 0.95)", 
+              border: "1px solid #334155", 
+              borderRadius: "16px", 
+              backdropFilter: "blur(8px)", 
+              boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.5)" 
+            }}
+            itemStyle={{ fontSize: "12px", padding: "2px 0" }}
             labelStyle={{ color: "#94a3b8", fontWeight: "bold", marginBottom: "8px" }}
             formatter={(val: number | any) => [`$${(val ?? 0).toLocaleString()}`, ""]}
           />
@@ -72,45 +82,75 @@ export function ProjectionChart({ data, retirementAge }: ProjectionChartProps) {
             iconType="circle"
             wrapperStyle={{ paddingTop: '0', fontSize: '12px', color: '#94a3b8' }}
           />
+          
+          {/* Background Areas for context (Stacked) */}
           <Area
             type="monotone"
             dataKey="capitalReserva"
-            name="Reserva"
-            stroke="#3b82f6"
-            strokeWidth={0}
-            fillOpacity={1}
-            fill="url(#colorReserva)"
             stackId="1"
+            stroke="none"
+            fill="url(#colorReserva)"
+            legendType="none"
+            isAnimationActive={true}
           />
           <Area
             type="monotone"
             dataKey="capitalCaja"
+            stackId="1"
+            stroke="none"
+            fill="url(#colorCaja)"
+            legendType="none"
+            isAnimationActive={true}
+          />
+
+          {/* Individual Curves (Non-stacked for visibility as requested) */}
+          <Line
+            type="monotone"
+            dataKey="capitalReserva"
+            name="Reserva"
+            stroke="#3b82f6"
+            strokeWidth={3}
+            dot={false}
+            activeDot={{ r: 6, strokeWidth: 0 }}
+          />
+          <Line
+            type="monotone"
+            dataKey="capitalCaja"
             name="Caja"
             stroke="#10b981"
-            strokeWidth={0}
-            fillOpacity={1}
-            fill="url(#colorCaja)"
-            stackId="1"
+            strokeWidth={3}
+            dot={false}
+            activeDot={{ r: 6, strokeWidth: 0 }}
           />
+          
+          {/* Total Net Worth Line */}
           <Line
             type="monotone"
             dataKey="capitalTotal"
             name="Patrimonio Total"
             stroke="#f8fafc"
-            strokeWidth={3}
-            dot={false}
+            strokeWidth={2}
             strokeDasharray="5 5"
-            activeDot={{ r: 6, fill: '#f8fafc', stroke: '#0f172a', strokeWidth: 2 }}
+            dot={false}
+            activeDot={{ r: 4, fill: '#f8fafc', stroke: '#0f172a', strokeWidth: 2 }}
           />
+
           <ReferenceLine 
             x={data.find(d => d.edad >= retirementAge)?.ano} 
             stroke="#ef4444" 
             strokeDasharray="4 4" 
             strokeWidth={2}
-            label={{ value: 'JUBILACIÓN', position: 'insideTopLeft', fill: '#ef4444', fontSize: 10, fontWeight: 'bold' }} 
+            label={{ 
+              value: 'JUBILACIÓN', 
+              position: 'insideTopLeft', 
+              fill: '#ef4444', 
+              fontSize: 10, 
+              fontWeight: 'bold'
+            }} 
           />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
   );
 }
+

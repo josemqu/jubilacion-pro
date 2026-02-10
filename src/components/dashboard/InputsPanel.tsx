@@ -32,6 +32,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             max={90}
             onChange={(v) => updateInput("edadActual", v)}
             suffix=" años"
+            tooltip="Tu edad actual para comenzar los cálculos desde hoy."
           />
           <SliderInput
             label="Edad de Jubilación"
@@ -40,6 +41,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             max={90}
             onChange={(v) => updateInput("edadJubilacion", v)}
             suffix=" años"
+            tooltip="La edad en la que planeas dejar de trabajar y empezar a usar tus ahorros."
           />
           <SliderInput
             label="Esperanza de Vida"
@@ -48,6 +50,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             max={110}
             onChange={(v) => updateInput("esperanzaVida", v)}
             suffix=" años"
+            tooltip="Utilizado para calcular hasta qué edad debe durar tu capital."
           />
         </div>
       </section>
@@ -63,28 +66,41 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             label="Ingreso Mensual"
             value={inputs.ingresoMensual}
             min={0}
-            max={100000}
+            max={20000}
             step={100}
             onChange={(v) => updateInput("ingresoMensual", v)}
             format={(v) => `$${v.toLocaleString()}`}
+            tooltip="Tus ingresos netos totales por mes (sueldo, rentas, etc.)."
           />
           <SliderInput
             label="Gasto Mensual"
             value={inputs.gastoMensual}
             min={0}
-            max={100000}
+            max={20000}
             step={100}
             onChange={(v) => updateInput("gastoMensual", v)}
             format={(v) => `$${v.toLocaleString()}`}
+            tooltip="Tus gastos de vida actuales por mes."
           />
           <SliderInput
-            label="Aporte a Reserva"
+            label="Aporte Reserva Jubilación"
             value={inputs.aporteMensualJubilacion}
             min={0}
-            max={50000}
-            step={50}
+            max={5000}
+            step={100}
             onChange={(v) => updateInput("aporteMensualJubilacion", v)}
             format={(v) => `$${v.toLocaleString()}`}
+            tooltip="Monto que separas específicamente para ahorrar/invertir cada mes."
+          />
+          <SliderInput
+            label="Retiro Deseado"
+            value={inputs.gastoMensualDeseado}
+            min={inputs.gastoMensual * 0.5}
+            max={inputs.gastoMensual * 3}
+            step={100}
+            onChange={(v) => updateInput("gastoMensualDeseado", v)}
+            format={(v) => `$${v.toLocaleString()}`}
+            tooltip="El nivel de gasto mensual que aspiras tener una vez jubilado (a valores de hoy)."
           />
         </div>
       </section>
@@ -104,6 +120,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             step={5000}
             onChange={(v) => updateInput("capitalInicialCaja", v)}
             format={(v) => `$${v.toLocaleString()}`}
+            tooltip="Dinero en efectivo o cuentas de alta liquidez disponibles hoy."
           />
           <SliderInput
             label="Reserva Actual"
@@ -113,6 +130,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             step={5000}
             onChange={(v) => updateInput("capitalInicialReserva", v)}
             format={(v) => `$${v.toLocaleString()}`}
+            tooltip="Inversiones, plazos fijos o ahorros de largo plazo que ya posees."
           />
         </div>
       </section>
@@ -132,6 +150,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             step={0.5}
             onChange={(v) => updateInput("tasaRetornoCajaAnual", v)}
             suffix="%"
+            tooltip="Tasa Nominal Anual estimada para tu capital en caja."
           />
           <SliderInput
             label="TNA Reserva"
@@ -141,6 +160,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             step={0.5}
             onChange={(v) => updateInput("tasaRetornoReservaAnual", v)}
             suffix="%"
+            tooltip="Tasa de interés anual esperada para tus inversiones de reserva."
           />
           <SliderInput
             label="Inflación"
@@ -150,15 +170,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             step={0.1}
             onChange={(v) => updateInput("inflacionAnual", v)}
             suffix="%"
-          />
-          <SliderInput
-            label="Retiro Deseado"
-            value={inputs.gastoMensualDeseado}
-            min={inputs.gastoMensual * 0.5}
-            max={inputs.gastoMensual * 3}
-            step={100}
-            onChange={(v) => updateInput("gastoMensualDeseado", v)}
-            format={(v) => `$${v.toLocaleString()}`}
+            tooltip="Inflación anual promedio estimada. Afectará el poder de compra futuro."
           />
         </div>
       </section>
