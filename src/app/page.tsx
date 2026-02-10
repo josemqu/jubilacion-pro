@@ -63,11 +63,12 @@ export default function Home() {
             <button 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors lg:hidden"
+              aria-label={isSidebarOpen ? "Cerrar parámetros" : "Abrir parámetros"}
             >
               <Settings2 size={20} />
             </button>
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-600 rounded-xl shadow-lg shadow-blue-900/20">
+              <div className="p-2 bg-blue-600 rounded-xl shadow-lg shadow-blue-900/20" aria-hidden="true">
                 <Calculator className="text-white" size={20} />
               </div>
               <div className="hidden sm:block">
@@ -108,6 +109,7 @@ export default function Home() {
               onClick={handleReset}
               className="p-2 text-slate-400 hover:text-white transition-colors"
               title="Resetear valores"
+              aria-label="Reiniciar todos los valores del simulador"
             >
               <RotateCcw size={18} />
             </button>
@@ -143,6 +145,7 @@ export default function Home() {
               <button 
                 onClick={() => setIsSidebarOpen(false)}
                 className="text-slate-500 hover:text-white transition-colors"
+                aria-label="Cerrar panel lateral"
               >
                 <ChevronLeft size={20} />
               </button>
