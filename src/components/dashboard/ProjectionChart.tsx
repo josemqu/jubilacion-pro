@@ -34,22 +34,22 @@ const CustomTooltip = React.memo(({ active, payload, label }: any) => {
               <div className="w-2 h-2 rounded-full bg-blue-500" />
               <span className="text-slate-400">Reserva</span>
             </div>
-            <span className="text-blue-400 font-mono font-bold">${Math.round(data.capitalReserva).toLocaleString()}</span>
+            <span className="text-blue-400 font-mono font-bold">${Math.round(data.capitalReserva).toLocaleString('de-DE')}</span>
           </div>
           <div className="flex justify-between items-center gap-4 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-emerald-500" />
               <span className="text-slate-400">Caja</span>
             </div>
-            <span className="text-emerald-400 font-mono font-bold">${Math.round(data.capitalCaja).toLocaleString()}</span>
+            <span className="text-emerald-400 font-mono font-bold">${Math.round(data.capitalCaja).toLocaleString('de-DE')}</span>
           </div>
           <div className="mt-2 pt-2 border-t border-slate-800 flex justify-between items-center bg-slate-800/30 -mx-4 px-4 py-2">
             <span className="text-slate-200 text-xs font-bold uppercase tracking-tight">Total</span>
-            <span className="text-white font-mono text-sm font-black">${Math.round(data.capitalTotal).toLocaleString()}</span>
+            <span className="text-white font-mono text-sm font-black">${Math.round(data.capitalTotal).toLocaleString('de-DE')}</span>
           </div>
           {data.gastosAnuales > 0 && (
             <div className="text-[10px] text-slate-500 italic mt-1 text-right">
-              Gasto anual: ${Math.round(data.gastosAnuales).toLocaleString()}
+              Gasto anual: ${Math.round(data.gastosAnuales).toLocaleString('de-DE')}
             </div>
           )}
         </div>

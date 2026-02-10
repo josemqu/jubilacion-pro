@@ -32,6 +32,10 @@ export const metadata: Metadata = {
     title: "Jubilación Pro | Tu Guía para el Retiro",
     description: "Visualiza tu futuro financiero con nuestro simulador avanzado.",
   },
+  icons: {
+    icon: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({

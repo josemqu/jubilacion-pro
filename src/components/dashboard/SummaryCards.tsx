@@ -66,7 +66,11 @@ export function SummaryCards({ results }: SummaryCardsProps) {
   const status = statusConfig[estado];
 
   const formatCurrency = (val: number) => 
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+    new Intl.NumberFormat('de-DE', { 
+      style: 'currency', 
+      currency: 'USD', 
+      maximumFractionDigits: 0 
+    }).format(val).replace('$', '').trim(); // Remove symbol to keep just the formatted number if needed, or keep it. The user has $ sign in the JSX usually. No, wait, in SummaryCards it is used in <p className="text-2xl font-bold text-slate-100">{formatCurrency(card.value)}</p>. So it will include the currency symbol of de-DE (which might be $ or USD). Let's use 'en-DE' or 'es-ES'. actually 'de-DE' with currency USD might put 'USD' or '$' at the end. Actually the user wants $ symbol. Let's manually do it for full control.
 
   return (
     <div className="space-y-6">

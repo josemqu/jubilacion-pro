@@ -69,7 +69,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             max={20000}
             step={100}
             onChange={(v) => updateInput("ingresoMensual", v)}
-            format={(v) => `$${v.toLocaleString()}`}
+            format={(v) => `$${v.toLocaleString('de-DE')}`}
             tooltip="Tus ingresos netos totales por mes (sueldo, rentas, etc.)."
           />
           <SliderInput
@@ -79,7 +79,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             max={20000}
             step={100}
             onChange={(v) => updateInput("gastoMensual", v)}
-            format={(v) => `$${v.toLocaleString()}`}
+            format={(v) => `$${v.toLocaleString('de-DE')}`}
             tooltip="Tus gastos de vida actuales por mes."
           />
           <SliderInput
@@ -89,7 +89,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             max={5000}
             step={100}
             onChange={(v) => updateInput("aporteMensualJubilacion", v)}
-            format={(v) => `$${v.toLocaleString()}`}
+            format={(v) => `$${v.toLocaleString('de-DE')}`}
             tooltip="Monto que separas específicamente para ahorrar/invertir cada mes."
           />
           <SliderInput
@@ -99,7 +99,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             max={inputs.gastoMensual * 3}
             step={100}
             onChange={(v) => updateInput("gastoMensualDeseado", v)}
-            format={(v) => `$${v.toLocaleString()}`}
+            format={(v) => `$${v.toLocaleString('de-DE')}`}
             tooltip="El nivel de gasto mensual que aspiras tener una vez jubilado (a valores de hoy)."
           />
         </div>
@@ -119,7 +119,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             max={1000000}
             step={5000}
             onChange={(v) => updateInput("capitalInicialCaja", v)}
-            format={(v) => `$${v.toLocaleString()}`}
+            format={(v) => `$${v.toLocaleString('de-DE')}`}
             tooltip="Dinero en efectivo o cuentas de alta liquidez disponibles hoy."
           />
           <SliderInput
@@ -129,7 +129,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             max={500000}
             step={100}
             onChange={(v) => updateInput("capitalInicialReserva", v)}
-            format={(v) => `$${v.toLocaleString()}`}
+            format={(v) => `$${v.toLocaleString('de-DE')}`}
             tooltip="Inversiones, plazos fijos o ahorros de largo plazo que ya posees."
           />
         </div>

@@ -57,7 +57,7 @@ export default function Home() {
   return (
     <div className="h-screen bg-[#020617] text-slate-200 font-sans selection:bg-blue-500/30 flex flex-col overflow-hidden">
       {/* Top Navigation Bar */}
-      <nav className="h-16 flex-shrink-0 z-50 border-b border-slate-800 bg-slate-950/80 backdrop-blur-md">
+      <nav className="h-16 flex-shrink-0 z-50 border-b border-slate-800/50 bg-slate-950/40 backdrop-blur-md">
         <div className="px-4 h-full flex justify-between items-center">
           <div className="flex items-center gap-4">
             <button 
@@ -68,8 +68,8 @@ export default function Home() {
               <Settings2 size={20} />
             </button>
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-600 rounded-xl shadow-lg shadow-blue-900/20" aria-hidden="true">
-                <Calculator className="text-white" size={20} />
+              <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center border border-slate-800 shadow-2xl" aria-hidden="true">
+                <img src="/icon.png" alt="Logo Jubilación Pro" className="w-full h-full object-cover" />
               </div>
               <div className="hidden sm:block">
                 <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
@@ -249,16 +249,16 @@ export default function Home() {
                               <td className="px-6 py-4 text-slate-400 font-mono group-hover:text-blue-400">{row.ano}</td>
                               <td className="px-6 py-4 text-slate-500">{row.edad} años</td>
                               <td className="px-6 py-4 text-emerald-400/90 text-right font-mono">
-                                ${Math.round(row.capitalCaja).toLocaleString()}
+                                ${Math.round(row.capitalCaja).toLocaleString('de-DE')}
                               </td>
                               <td className="px-6 py-4 text-blue-400/90 text-right font-mono">
-                                ${Math.round(row.capitalReserva).toLocaleString()}
+                                ${Math.round(row.capitalReserva).toLocaleString('de-DE')}
                               </td>
                               <td className="px-6 py-4 text-indigo-400 text-right font-mono">
-                                +${Math.round(row.rendimientoTotal).toLocaleString()}
+                                +${Math.round(row.rendimientoTotal).toLocaleString('de-DE')}
                               </td>
                               <td className="px-6 py-4 text-slate-500 text-right">
-                                ${Math.round(row.gastosMensuales || 0).toLocaleString()}
+                                ${Math.round(row.gastosMensuales || 0).toLocaleString('de-DE')}
                               </td>
                             </tr>
                           ))}
@@ -285,8 +285,8 @@ export default function Home() {
                   <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
                 </h4>
                 <p className="text-base text-blue-300/70 leading-relaxed font-medium">
-                  Basado en tu tasa de ahorro actual de <span className="text-blue-100 font-bold">${inputs.aporteMensualJubilacion}/mes</span>, 
-                  tu capital proyectado al retiro es de <span className="text-emerald-400 font-bold">${Math.round(results.acumulacion.capitalTotalFinal).toLocaleString()}</span>. 
+                  Basado en tu tasa de ahorro actual de <span className="text-blue-100 font-bold">${inputs.aporteMensualJubilacion.toLocaleString('de-DE')}/mes</span>, 
+                  tu capital proyectado al retiro es de <span className="text-emerald-400 font-bold">${Math.round(results.acumulacion.capitalTotalFinal).toLocaleString('de-DE')}</span>. 
                   {results.retiro.esSuficiente 
                     ? ` Este patrimonio es suficiente para cubrir tu nivel de vida deseado hasta los ${inputs.esperanzaVida} años.` 
                     : ` Actualmente el plan presenta un déficit. Considera extender la jubilación a los ${inputs.edadJubilacion + 3} años o aumentar el ahorro mensual.`}
