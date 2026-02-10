@@ -4,16 +4,55 @@ import { useCalculator } from "@/hooks/use-calculator";
 import { SummaryCards } from "@/components/dashboard/SummaryCards";
 import { ProjectionChart } from "@/components/dashboard/ProjectionChart";
 import { InputsPanel } from "@/components/dashboard/InputsPanel";
+import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calculator, Settings2, LineChart, LayoutDashboard, Share2, Download, Upload, RotateCcw, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calculator, Settings2, LineChart, LayoutDashboard, Share2, Download, Upload, RotateCcw, X, ChevronLeft, ChevronRight, Info } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import * as Tooltip from "@radix-ui/react-tooltip";
 import confetti from "canvas-confetti";
 import { DEFAULT_INPUTS } from "@/lib/constants";
+
+function NavButtonTooltip({ children, content }: { children: React.ReactNode; content: string }) {
+  return (
+    <Tooltip.Provider delayDuration={200}>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>
+          {children}
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content
+            className="z-[100] bg-slate-900 text-slate-200 p-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider shadow-2xl border border-slate-800 leading-none select-none animate-in fade-in zoom-in-95 duration-200"
+            sideOffset={8}
+            side="bottom"
+          >
+            {content}
+            <Tooltip.Arrow className="fill-slate-900" />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
+  );
+}
 
 export default function Home() {
   const { inputs, results, updateInput, importData, isLoaded } = useCalculator();
   const [activeTab, setActiveTab] = useState<"projection" | "details">("projection");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    confirmText: string;
+    onConfirm: () => void;
+    variant: "info" | "danger" | "warning";
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    confirmText: "",
+    onConfirm: () => {},
+    variant: "info"
+  });
 
   // Fire confetti only once when state becomes excellent
   useEffect(() => {
@@ -31,19 +70,35 @@ export default function Home() {
   }, [results.estado, isLoaded]);
 
   const handleExport = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(inputs, null, 2));
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "plan_jubilacion.json");
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
+    setModalConfig({
+      isOpen: true,
+      title: "Guardar Plan Actual",
+      description: "Se va a descargar un archivo con la configuración completa de tu plan actual para que puedas volver a cargarlo más tarde. ¿Deseas proceder?",
+      confirmText: "Descargar Archivo",
+      variant: "info",
+      onConfirm: () => {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(inputs, null, 2));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", `plan_jubilacion_${results.estado}.json`);
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+      }
+    });
   };
 
   const handleReset = () => {
-    if (confirm("¿Estás seguro de que quieres resetear todos los valores?")) {
-      importData(DEFAULT_INPUTS);
-    }
+    setModalConfig({
+      isOpen: true,
+      title: "Confirmar Reinicio",
+      description: "⚠ ADVERTENCIA: Se restablecerán todos los valores a los parámetros por defecto. Perderás cualquier cambio realizado en la sesión actual. ¿Deseas continuar?",
+      confirmText: "Reiniciar Todo",
+      variant: "danger",
+      onConfirm: () => {
+        importData(DEFAULT_INPUTS);
+      }
+    });
   };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -52,18 +107,26 @@ export default function Home() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const json = JSON.parse(event.target?.result as string);
-        importData(json);
-        alert("Plan importado correctamente.");
-      } catch (error) {
-        alert("Error al importar el archivo. Asegúrate de que sea un JSON válido de Jubilación Pro.");
+    setModalConfig({
+      isOpen: true,
+      title: "Cargar Nuevo Plan",
+      description: "Los datos del archivo seleccionado reemplazarán por completo tu configuración y proyecciones actuales. Esta acción no se puede deshacer.",
+      confirmText: "Importar Datos",
+      variant: "warning",
+      onConfirm: () => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const json = JSON.parse(event.target?.result as string);
+            importData(json);
+          } catch (error) {
+            alert("Error al importar el archivo. Asegúrate de que sea un JSON válido.");
+          }
+        };
+        reader.readAsText(file);
       }
-    };
-    reader.readAsText(file);
-    // Reset input so the same file can be uploaded again if needed
+    });
+    
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -104,36 +167,18 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="hidden md:flex bg-slate-900 p-1 rounded-lg border border-slate-800 mr-4">
+
+            
+            <NavButtonTooltip content="Resetear plan">
               <button 
-                onClick={() => setActiveTab("projection")}
-                className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all ${
-                  activeTab === "projection" 
-                    ? "bg-slate-800 text-white shadow-sm" 
-                    : "text-slate-500 hover:text-slate-300"
-                }`}
+                onClick={handleReset}
+                className="p-2 text-slate-400 hover:text-rose-400 transition-colors"
+                aria-label="Reiniciar todos los valores del simulador"
               >
-                Gráfico
+                <RotateCcw size={18} />
               </button>
-              <button 
-                onClick={() => setActiveTab("details")}
-                className={`px-4 py-1.5 text-xs font-medium rounded-md transition-all ${
-                  activeTab === "details" 
-                    ? "bg-slate-800 text-white shadow-sm" 
-                    : "text-slate-500 hover:text-slate-300"
-                }`}
-              >
-                Tabla
-              </button>
-            </div>
-            <button 
-              onClick={handleReset}
-              className="p-2 text-slate-400 hover:text-white transition-colors"
-              title="Resetear valores"
-              aria-label="Reiniciar todos los valores del simulador"
-            >
-              <RotateCcw size={18} />
-            </button>
+            </NavButtonTooltip>
+
             <input 
               type="file" 
               ref={fileInputRef} 
@@ -141,21 +186,26 @@ export default function Home() {
               accept=".json" 
               className="hidden" 
             />
-            <button 
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-sm font-medium rounded-lg transition-colors border border-slate-700 shadow-lg shadow-black/20"
-              title="Importar plan desde archivo JSON"
-            >
-              <Download size={16} />
-              <span className="hidden sm:inline">Importar</span>
-            </button>
-            <button 
-              onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-550 text-sm font-medium rounded-lg transition-all border border-blue-500 shadow-lg shadow-blue-900/20 active:scale-95"
-            >
-              <Upload size={16} />
-              <span className="hidden sm:inline">Exportar</span>
-            </button>
+            
+            <NavButtonTooltip content="Importar JSON">
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2 px-3 py-2 text-slate-400 hover:text-white transition-colors"
+                aria-label="Importar plan desde archivo JSON"
+              >
+                <Download size={18} />
+              </button>
+            </NavButtonTooltip>
+
+            <NavButtonTooltip content="Guardar Plan">
+              <button 
+                onClick={handleExport}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-sm font-bold text-white rounded-lg transition-all border border-blue-500 shadow-lg shadow-blue-900/20 active:scale-95 ml-2"
+              >
+                <Upload size={16} />
+                <span className="hidden sm:inline uppercase tracking-tighter">Exportar</span>
+              </button>
+            </NavButtonTooltip>
           </div>
         </div>
       </nav>
@@ -244,6 +294,29 @@ export default function Home() {
                   <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">
                     Proyección de Patrimonio
                   </h2>
+                </div>
+
+                <div className="flex bg-slate-900/50 p-1 rounded-xl border border-slate-800/50 backdrop-blur-sm">
+                  <button 
+                    onClick={() => setActiveTab("projection")}
+                    className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
+                      activeTab === "projection" 
+                        ? "bg-blue-600 text-white shadow-lg shadow-blue-900/20" 
+                        : "text-slate-500 hover:text-slate-300"
+                    }`}
+                  >
+                    Gráfico
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab("details")}
+                    className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
+                      activeTab === "details" 
+                        ? "bg-blue-600 text-white shadow-lg shadow-blue-900/20" 
+                        : "text-slate-500 hover:text-slate-300"
+                    }`}
+                  >
+                    Tabla
+                  </button>
                 </div>
               </div>
               
@@ -345,6 +418,16 @@ export default function Home() {
           </div>
         </main>
       </div>
+
+      <ConfirmationModal
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        onConfirm={modalConfig.onConfirm}
+        title={modalConfig.title}
+        description={modalConfig.description}
+        confirmText={modalConfig.confirmText}
+        variant={modalConfig.variant}
+      />
     </div>
   );
 }
