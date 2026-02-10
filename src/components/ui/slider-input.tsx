@@ -38,20 +38,25 @@ export function SliderInput({
             {label}
           </Label>
           {tooltip && (
-            <Tooltip.Provider>
+            <Tooltip.Provider delayDuration={200}>
               <Tooltip.Root>
                 <Tooltip.Trigger asChild>
-                  <button className="text-slate-500 hover:text-slate-300 transition-colors">
-                    <Info size={14} />
+                  <button className="text-blue-500/70 hover:text-blue-400 transition-all duration-300 hover:scale-110 active:scale-95 flex items-center">
+                    <Info size={16} strokeWidth={2} />
                   </button>
                 </Tooltip.Trigger>
                 <Tooltip.Portal>
                   <Tooltip.Content
-                    className="bg-slate-800 text-white p-2 rounded text-xs max-w-xs shadow-xl border border-slate-700"
-                    sideOffset={5}
+                    className="z-[100] bg-slate-900 text-slate-200 p-3 rounded-xl text-xs max-w-[240px] shadow-2xl border border-slate-800 leading-relaxed select-none animate-in fade-in zoom-in-95 duration-200"
+                    sideOffset={8}
+                    side="top"
+                    align="center"
                   >
-                    {tooltip}
-                    <Tooltip.Arrow className="fill-slate-800" />
+                    <div className="flex items-start gap-2.5">
+                      <Info size={14} className="text-blue-500 shrink-0 mt-0.5" />
+                      <span>{tooltip}</span>
+                    </div>
+                    <Tooltip.Arrow className="fill-slate-900" />
                   </Tooltip.Content>
                 </Tooltip.Portal>
               </Tooltip.Root>

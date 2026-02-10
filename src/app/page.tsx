@@ -241,7 +241,7 @@ export default function Home() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800/50">
-                          {results.tablaAnual.filter((_, i) => i % 5 === 0 || i === 0 || i === results.tablaAnual.length - 1).map((row) => (
+                          {results.tablaAnual.map((row) => (
                             <tr key={`${row.ano}-${row.edad}`} className="hover:bg-blue-500/5 transition-colors group">
                               <td className="px-6 py-4 text-slate-400 font-mono group-hover:text-blue-400">{row.ano}</td>
                               <td className="px-6 py-4 text-slate-500">{row.edad} años</td>
