@@ -29,8 +29,17 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Despliegue en Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Este proyecto está optimizado para desplegarse en [Vercel](https://vercel.com). Sigue estos pasos:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Conecta tu repositorio de GitHub a Vercel.
+2. Vercel detectará automáticamente que es un proyecto de Next.js.
+3. El comando de instalación será `pnpm install` y el de construcción `pnpm build`.
+4. El proyecto usa `localStorage` para la persistencia, por lo que no requiere base de datos externa para funcionar.
+
+### Configuración Manual
+Si necesitas configurar el proyecto manualmente en Vercel, utiliza los valores definidos en `vercel.json`.
+
+---
+© 2026 Jubilación Pro v2.0
