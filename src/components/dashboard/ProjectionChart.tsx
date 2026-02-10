@@ -1,5 +1,4 @@
-"use client";
-
+import React, { useMemo } from "react";
 import { YearData } from "@/lib/types";
 import { 
   Area, 
@@ -20,7 +19,7 @@ interface ProjectionChartProps {
   retirementAge: number;
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = React.memo(({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload as YearData;
     return (
@@ -30,23 +29,23 @@ const CustomTooltip = ({ active, payload, label }: any) => {
           <span className="text-slate-400 text-sm">{data.edad} años</span>
         </div>
         <div className="space-y-2">
-          <div className="flex justify-between items-center gap-4">
+          <div className="flex justify-between items-center gap-4 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-blue-500" />
-              <span className="text-slate-400 text-xs">Reserva</span>
+              <span className="text-slate-400">Reserva</span>
             </div>
-            <span className="text-blue-400 font-mono text-xs font-bold">${data.capitalReserva.toLocaleString()}</span>
+            <span className="text-blue-400 font-mono font-bold">${Math.round(data.capitalReserva).toLocaleString()}</span>
           </div>
-          <div className="flex justify-between items-center gap-4">
+          <div className="flex justify-between items-center gap-4 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span className="text-slate-400 text-xs">Caja</span>
+              <span className="text-slate-400">Caja</span>
             </div>
-            <span className="text-emerald-400 font-mono text-xs font-bold">${data.capitalCaja.toLocaleString()}</span>
+            <span className="text-emerald-400 font-mono font-bold">${Math.round(data.capitalCaja).toLocaleString()}</span>
           </div>
           <div className="mt-2 pt-2 border-t border-slate-800 flex justify-between items-center bg-slate-800/30 -mx-4 px-4 py-2">
             <span className="text-slate-200 text-xs font-bold uppercase tracking-tight">Total</span>
-            <span className="text-white font-mono text-sm font-black">${data.capitalTotal.toLocaleString()}</span>
+            <span className="text-white font-mono text-sm font-black">${Math.round(data.capitalTotal).toLocaleString()}</span>
           </div>
           {data.gastosAnuales > 0 && (
             <div className="text-[10px] text-slate-500 italic mt-1 text-right">
@@ -58,14 +57,18 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     );
   }
   return null;
-};
+});
 
-export function ProjectionChart({ data, retirementAge }: ProjectionChartProps) {
+CustomTooltip.displayName = "CustomTooltip";
+
+export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionChartProps) => {
   const formatCurrency = (value: number) => 
     `$${(value / 1000).toFixed(0)}k`;
 
-  const retirementYear = data.find(d => d.edad >= retirementAge)?.ano;
-  const lastYear = data[data.length - 1]?.ano;
+  const { retirementYear, lastYear } = useMemo(() => ({
+    retirementYear: data.find(d => d.edad >= retirementAge)?.ano,
+    lastYear: data[data.length - 1]?.ano
+  }), [data, retirementAge]);
 
   return (
     <div className="h-[450px] w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
@@ -119,7 +122,11 @@ export function ProjectionChart({ data, retirementAge }: ProjectionChartProps) {
             tick={{ fill: '#64748b' }}
           />
           
-          <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#334155', strokeWidth: 1 }} />
+          <Tooltip 
+            content={<CustomTooltip />} 
+            cursor={{ stroke: '#334155', strokeWidth: 1 }}
+            isAnimationActive={false}
+          />
           
           <Legend 
             verticalAlign="top" 
@@ -147,7 +154,7 @@ export function ProjectionChart({ data, retirementAge }: ProjectionChartProps) {
             stroke="none"
             fill="url(#colorReserva)"
             legendType="none"
-            isAnimationActive={true}
+            isAnimationActive={false}
           />
           <Area
             type="monotone"
@@ -156,7 +163,7 @@ export function ProjectionChart({ data, retirementAge }: ProjectionChartProps) {
             stroke="none"
             fill="url(#colorCaja)"
             legendType="none"
-            isAnimationActive={true}
+            isAnimationActive={false}
           />
 
           {/* Individual Curves */}
@@ -168,6 +175,7 @@ export function ProjectionChart({ data, retirementAge }: ProjectionChartProps) {
             strokeWidth={3}
             dot={false}
             activeDot={{ r: 5, strokeWidth: 0 }}
+            isAnimationActive={false}
           />
           <Line
             type="monotone"
@@ -177,6 +185,7 @@ export function ProjectionChart({ data, retirementAge }: ProjectionChartProps) {
             strokeWidth={3}
             dot={false}
             activeDot={{ r: 5, strokeWidth: 0 }}
+            isAnimationActive={false}
           />
           
           {/* Total Line */}
@@ -189,6 +198,7 @@ export function ProjectionChart({ data, retirementAge }: ProjectionChartProps) {
             strokeDasharray="4 4"
             dot={false}
             activeDot={{ r: 4, fill: '#f8fafc', stroke: '#0f172a', strokeWidth: 2 }}
+            isAnimationActive={false}
           />
 
           {/* Vertical Divider - Start of Retirement */}
@@ -215,5 +225,7 @@ export function ProjectionChart({ data, retirementAge }: ProjectionChartProps) {
       </ResponsiveContainer>
     </div>
   );
-}
+});
+
+ProjectionChart.displayName = "ProjectionChart";
 

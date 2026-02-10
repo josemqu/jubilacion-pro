@@ -174,10 +174,10 @@ export class RetirementCalculator {
       }
 
       if (dia % 365 === 0 || dia === diasTotales) {
-        const anosRetiro = dia % 365 === 0 ? dia / 365 : Math.floor(dia / 365) + 1;
-        const edad = this.inputs.edadJubilacion + anosRetiro - 1;
+        const anosRetiro = dia / 365;
+        const edad = this.inputs.edadJubilacion + anosRetiro;
         const anosDesdeInicio = this.inputs.edadJubilacion - this.inputs.edadActual;
-        const anoCalendario = currentYear + anosDesdeInicio + anosRetiro - 1;
+        const anoCalendario = currentYear + anosDesdeInicio + anosRetiro;
         
         datosAnuales.push({
           ano: anoCalendario,
