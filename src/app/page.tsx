@@ -5,8 +5,8 @@ import { SummaryCards } from "@/components/dashboard/SummaryCards";
 import { ProjectionChart } from "@/components/dashboard/ProjectionChart";
 import { InputsPanel } from "@/components/dashboard/InputsPanel";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calculator, Settings2, LineChart, LayoutDashboard, Share2, Download, RotateCcw, X, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Calculator, Settings2, LineChart, LayoutDashboard, Share2, Download, Upload, RotateCcw, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
 import { DEFAULT_INPUTS } from "@/lib/constants";
 
@@ -44,6 +44,27 @@ export default function Home() {
     if (confirm("¿Estás seguro de que quieres resetear todos los valores?")) {
       importData(DEFAULT_INPUTS);
     }
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        importData(json);
+        alert("Plan importado correctamente.");
+      } catch (error) {
+        alert("Error al importar el archivo. Asegúrate de que sea un JSON válido de Jubilación Pro.");
+      }
+    };
+    reader.readAsText(file);
+    // Reset input so the same file can be uploaded again if needed
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   if (!isLoaded) {
@@ -113,11 +134,26 @@ export default function Home() {
             >
               <RotateCcw size={18} />
             </button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleImport} 
+              accept=".json" 
+              className="hidden" 
+            />
             <button 
-              onClick={handleExport}
+              onClick={() => fileInputRef.current?.click()}
               className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-sm font-medium rounded-lg transition-colors border border-slate-700 shadow-lg shadow-black/20"
+              title="Importar plan desde archivo JSON"
             >
               <Download size={16} />
+              <span className="hidden sm:inline">Importar</span>
+            </button>
+            <button 
+              onClick={handleExport}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-550 text-sm font-medium rounded-lg transition-all border border-blue-500 shadow-lg shadow-blue-900/20 active:scale-95"
+            >
+              <Upload size={16} />
               <span className="hidden sm:inline">Exportar</span>
             </button>
           </div>

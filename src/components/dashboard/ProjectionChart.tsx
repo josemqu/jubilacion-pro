@@ -209,12 +209,12 @@ export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionCh
               strokeWidth={3}
               label={{ 
                 value: '➔ JUBILACIÓN', 
-                position: 'insideTopRight', 
+                position: 'insideTopLeft', 
                 fill: '#f43f5e', 
                 fontSize: 12, 
                 fontWeight: '900',
                 dy: 10,
-                dx: -10
+                dx: 10
               }} 
             />
           )}
