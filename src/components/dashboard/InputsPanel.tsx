@@ -63,7 +63,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             label="Ingreso Mensual"
             value={inputs.ingresoMensual}
             min={0}
-            max={20000}
+            max={100000}
             step={100}
             onChange={(v) => updateInput("ingresoMensual", v)}
             format={(v) => `$${v.toLocaleString()}`}
@@ -72,7 +72,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             label="Gasto Mensual"
             value={inputs.gastoMensual}
             min={0}
-            max={20000}
+            max={100000}
             step={100}
             onChange={(v) => updateInput("gastoMensual", v)}
             format={(v) => `$${v.toLocaleString()}`}
@@ -81,7 +81,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             label="Aporte a Reserva"
             value={inputs.aporteMensualJubilacion}
             min={0}
-            max={10000}
+            max={50000}
             step={50}
             onChange={(v) => updateInput("aporteMensualJubilacion", v)}
             format={(v) => `$${v.toLocaleString()}`}
@@ -100,8 +100,8 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             label="Capital de Caja"
             value={inputs.capitalInicialCaja}
             min={0}
-            max={100000}
-            step={1000}
+            max={1000000}
+            step={5000}
             onChange={(v) => updateInput("capitalInicialCaja", v)}
             format={(v) => `$${v.toLocaleString()}`}
           />
