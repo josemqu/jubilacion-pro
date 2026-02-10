@@ -2,7 +2,6 @@
 
 import { YearData } from "@/lib/types";
 import { 
-  AreaChart, 
   Area, 
   XAxis, 
   YAxis, 
@@ -11,6 +10,7 @@ import {
   ResponsiveContainer,
   Legend,
   ReferenceLine,
+  ReferenceArea,
   Line,
   ComposedChart
 } from "recharts";
@@ -20,17 +20,73 @@ interface ProjectionChartProps {
   retirementAge: number;
 }
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload as YearData;
+    return (
+      <div className="bg-slate-900/95 border border-slate-700 p-4 rounded-xl shadow-2xl backdrop-blur-md min-w-[200px]">
+        <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
+          <span className="text-slate-200 font-bold text-lg">Año {Math.floor(label)}</span>
+          <span className="text-slate-400 text-sm">{data.edad} años</span>
+        </div>
+        <div className="space-y-2">
+          <div className="flex justify-between items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-blue-500" />
+              <span className="text-slate-400 text-xs">Reserva</span>
+            </div>
+            <span className="text-blue-400 font-mono text-xs font-bold">${data.capitalReserva.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="text-slate-400 text-xs">Caja</span>
+            </div>
+            <span className="text-emerald-400 font-mono text-xs font-bold">${data.capitalCaja.toLocaleString()}</span>
+          </div>
+          <div className="mt-2 pt-2 border-t border-slate-800 flex justify-between items-center bg-slate-800/30 -mx-4 px-4 py-2">
+            <span className="text-slate-200 text-xs font-bold uppercase tracking-tight">Total</span>
+            <span className="text-white font-mono text-sm font-black">${data.capitalTotal.toLocaleString()}</span>
+          </div>
+          {data.gastosAnuales > 0 && (
+            <div className="text-[10px] text-slate-500 italic mt-1 text-right">
+              Gasto anual: ${Math.round(data.gastosAnuales).toLocaleString()}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 export function ProjectionChart({ data, retirementAge }: ProjectionChartProps) {
   const formatCurrency = (value: number) => 
     `$${(value / 1000).toFixed(0)}k`;
 
+  const retirementYear = data.find(d => d.edad >= retirementAge)?.ano;
+  const lastYear = data[data.length - 1]?.ano;
+
   return (
     <div className="h-[450px] w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
-      <h3 className="text-lg font-semibold text-slate-200 mb-6 flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] animate-pulse" />
-        Evolución de Patrimonio Proyectada
-      </h3>
-      <ResponsiveContainer width="100%" height="90%">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] animate-pulse" />
+          Evolución de Patrimonio Proyectada
+        </h3>
+        <div className="flex items-center gap-4 text-[10px] uppercase tracking-widest font-bold">
+          <div className="flex items-center gap-1.5 text-slate-500">
+            <div className="w-3 h-1 bg-slate-800 border border-slate-700/50" />
+            Acumulación
+          </div>
+          <div className="flex items-center gap-1.5 text-rose-500/70">
+            <div className="w-3 h-1 bg-rose-500/10 border border-rose-500/20" />
+            Jubilación
+          </div>
+        </div>
+      </div>
+      
+      <ResponsiveContainer width="100%" height="85%">
         <ComposedChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="colorReserva" x1="0" y1="0" x2="0" y2="1">
@@ -41,49 +97,49 @@ export function ProjectionChart({ data, retirementAge }: ProjectionChartProps) {
               <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
               <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
             </linearGradient>
-            <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#f8fafc" stopOpacity={0.1}/>
-              <stop offset="95%" stopColor="#f8fafc" stopOpacity={0}/>
-            </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} opacity={0.5} />
+          
+          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} opacity={0.3} />
+          
           <XAxis 
             dataKey="ano" 
-            stroke="#64748b" 
-            fontSize={12} 
+            stroke="#475569" 
+            fontSize={11} 
             tickLine={false} 
             axisLine={false}
             tick={{ fill: '#64748b' }}
+            interval="preserveStartEnd"
           />
           <YAxis 
-            stroke="#64748b" 
-            fontSize={12} 
+            stroke="#475569" 
+            fontSize={11} 
             tickLine={false} 
             axisLine={false}
             tickFormatter={formatCurrency}
             tick={{ fill: '#64748b' }}
           />
-          <Tooltip 
-            contentStyle={{ 
-              backgroundColor: "rgba(15, 23, 42, 0.95)", 
-              border: "1px solid #334155", 
-              borderRadius: "16px", 
-              backdropFilter: "blur(8px)", 
-              boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.5)" 
-            }}
-            itemStyle={{ fontSize: "12px", padding: "2px 0" }}
-            labelStyle={{ color: "#94a3b8", fontWeight: "bold", marginBottom: "8px" }}
-            formatter={(val: number | any) => [`$${(val ?? 0).toLocaleString()}`, ""]}
-          />
+          
+          <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#334155', strokeWidth: 1 }} />
+          
           <Legend 
             verticalAlign="top" 
             align="right" 
             height={36} 
             iconType="circle"
-            wrapperStyle={{ paddingTop: '0', fontSize: '12px', color: '#94a3b8' }}
+            wrapperStyle={{ paddingTop: '0', fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}
           />
           
-          {/* Background Areas for context (Stacked) */}
+          {/* Visual distinction between phases */}
+          {retirementYear && (
+            <ReferenceArea 
+              x1={retirementYear} 
+              x2={lastYear} 
+              fill="rgba(244, 63, 94, 0.08)" 
+              stroke="none"
+            />
+          )}
+
+          {/* Background Areas (Stacked) */}
           <Area
             type="monotone"
             dataKey="capitalReserva"
@@ -103,7 +159,7 @@ export function ProjectionChart({ data, retirementAge }: ProjectionChartProps) {
             isAnimationActive={true}
           />
 
-          {/* Individual Curves (Non-stacked for visibility as requested) */}
+          {/* Individual Curves */}
           <Line
             type="monotone"
             dataKey="capitalReserva"
@@ -111,7 +167,7 @@ export function ProjectionChart({ data, retirementAge }: ProjectionChartProps) {
             stroke="#3b82f6"
             strokeWidth={3}
             dot={false}
-            activeDot={{ r: 6, strokeWidth: 0 }}
+            activeDot={{ r: 5, strokeWidth: 0 }}
           />
           <Line
             type="monotone"
@@ -120,34 +176,41 @@ export function ProjectionChart({ data, retirementAge }: ProjectionChartProps) {
             stroke="#10b981"
             strokeWidth={3}
             dot={false}
-            activeDot={{ r: 6, strokeWidth: 0 }}
+            activeDot={{ r: 5, strokeWidth: 0 }}
           />
           
-          {/* Total Net Worth Line */}
+          {/* Total Line */}
           <Line
             type="monotone"
             dataKey="capitalTotal"
-            name="Patrimonio Total"
+            name="Total"
             stroke="#f8fafc"
             strokeWidth={2}
-            strokeDasharray="5 5"
+            strokeDasharray="4 4"
             dot={false}
             activeDot={{ r: 4, fill: '#f8fafc', stroke: '#0f172a', strokeWidth: 2 }}
           />
 
-          <ReferenceLine 
-            x={data.find(d => d.edad >= retirementAge)?.ano} 
-            stroke="#ef4444" 
-            strokeDasharray="4 4" 
-            strokeWidth={2}
-            label={{ 
-              value: 'JUBILACIÓN', 
-              position: 'insideTopLeft', 
-              fill: '#ef4444', 
-              fontSize: 10, 
-              fontWeight: 'bold'
-            }} 
-          />
+          {/* Vertical Divider - Start of Retirement */}
+          {retirementYear && (
+            <ReferenceLine 
+              x={retirementYear} 
+              stroke="#f43f5e" 
+              strokeWidth={3}
+              label={{ 
+                value: '➔ JUBILACIÓN', 
+                position: 'insideTopRight', 
+                fill: '#f43f5e', 
+                fontSize: 12, 
+                fontWeight: '900',
+                dy: 10,
+                dx: -10
+              }} 
+            />
+          )}
+
+          {/* Baseline */}
+          <ReferenceLine y={0} stroke="#475569" strokeWidth={1} />
         </ComposedChart>
       </ResponsiveContainer>
     </div>

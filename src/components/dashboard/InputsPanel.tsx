@@ -17,7 +17,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
   const titleClasses = "text-sm font-bold text-slate-400 uppercase tracking-wider";
 
   return (
-    <div className="flex flex-col gap-6 pb-20">
+    <div className="flex flex-col gap-6 p-2">
       {/* Vida */}
       <section className={sectionClasses}>
         <div className={headerClasses}>
@@ -126,8 +126,8 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             label="Reserva Actual"
             value={inputs.capitalInicialReserva}
             min={0}
-            max={1000000}
-            step={5000}
+            max={500000}
+            step={100}
             onChange={(v) => updateInput("capitalInicialReserva", v)}
             format={(v) => `$${v.toLocaleString()}`}
             tooltip="Inversiones, plazos fijos o ahorros de largo plazo que ya posees."
