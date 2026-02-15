@@ -11,6 +11,8 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import confetti from "canvas-confetti";
 import { DEFAULT_INPUTS } from "@/lib/constants";
+import { utils, writeFile } from "xlsx";
+import { FileSpreadsheet } from "lucide-react";
 
 function NavButtonTooltip({ children, content }: { children: React.ReactNode; content: string }) {
   return (
@@ -138,6 +140,42 @@ export default function Home() {
     return months[monthIndex];
   };
 
+  const handleExcelExport = () => {
+    try {
+      const dataToExport = results.tablaAnual.map((row, index) => ({
+        "Periodo": index === 0 ? `Inicio (${getStartMonthName(inputs.mesInicio)})` : `Dic ${row.ano}`,
+        "Año": row.ano,
+        "Edad": row.edad,
+        "Capital Caja ($)": Math.round(row.capitalCaja),
+        "Capital Reserva ($)": Math.round(row.capitalReserva),
+        "Capital Total ($)": Math.round(row.capitalTotal),
+        "Rend. Caja ($)": Math.round(row.rendimientoCaja || 0),
+        "Rend. Reserva ($)": Math.round(row.rendimientoReserva || 0),
+        "Rend. Total ($)": Math.round(row.rendimientoTotal),
+        "Ingresos Trabajo ($)": Math.round(row.ingresosTrabajo || 0),
+        "Gasto Anual ($)": Math.round(row.gastosAnuales || 0),
+        "Aportes Reserva ($)": Math.round(row.aportes || 0),
+        "Gasto Mensual ($)": Math.round(row.gastosMensuales || 0),
+        "Referencia Inflación": row.gastoMensualAjustado ? (row.gastoMensualAjustado / inputs.gastoMensualDeseado).toFixed(2) : "1.00"
+      }));
+
+      const worksheet = utils.json_to_sheet(dataToExport);
+      const workbook = utils.book_new();
+      utils.book_append_sheet(workbook, worksheet, "Plan de Jubilación");
+      
+      worksheet["!cols"] = [ 
+        { wch: 20 }, { wch: 8 }, { wch: 8 }, { wch: 18 }, { wch: 18 }, 
+        { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 18 }, 
+        { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 15 } 
+      ];
+
+      writeFile(workbook, `jubilacion_pro_proyeccion.xlsx`);
+    } catch (error) {
+      console.error("Error exporting to Excel:", error);
+      alert("Error al generar el Excel.");
+    }
+  };
+
   if (!isLoaded) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -202,6 +240,16 @@ export default function Home() {
                 aria-label="Importar plan desde archivo JSON"
               >
                 <Download size={18} />
+              </button>
+            </NavButtonTooltip>
+
+            <NavButtonTooltip content="Exportar Excel">
+              <button 
+                onClick={handleExcelExport}
+                className="p-2 text-slate-400 hover:text-emerald-400 transition-colors"
+                aria-label="Exportar cálculos a Excel"
+              >
+                <FileSpreadsheet size={18} />
               </button>
             </NavButtonTooltip>
 
@@ -326,6 +374,15 @@ export default function Home() {
                     Tabla
                   </button>
                 </div>
+                {activeTab === "details" && (
+                  <button 
+                    onClick={handleExcelExport}
+                    className="flex items-center gap-2 px-3 py-1 bg-emerald-600/10 hover:bg-emerald-600/20 text-[10px] font-bold text-emerald-400 rounded-lg transition-all border border-emerald-500/20 uppercase tracking-wider"
+                  >
+                    <FileSpreadsheet size={12} />
+                    <span>Excel</span>
+                  </button>
+                )}
               </div>
               
               <AnimatePresence mode="wait">
@@ -350,44 +407,56 @@ export default function Home() {
                   >
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-sm border-collapse">
-                        <thead className="bg-slate-950/80 text-slate-500 uppercase text-[10px] tracking-[0.15em]">
+                        <thead className="bg-slate-950/80 text-slate-500 uppercase text-[9px] tracking-[0.1em]">
                           <tr>
-                            <th className="px-6 py-5 font-black border-b border-slate-800">Año</th>
-                            <th className="px-6 py-5 font-black border-b border-slate-800">Edad</th>
-                            <th className="px-6 py-5 font-black border-b border-slate-800 text-right">Caja</th>
-                            <th className="px-6 py-5 font-black border-b border-slate-800 text-right">Reserva</th>
-                            <th className="px-6 py-5 font-black border-b border-slate-800 text-right">Rendimiento</th>
-                            <th className="px-6 py-5 font-black border-b border-slate-800 text-right">Gasto Mes</th>
+                            <th className="px-4 py-5 font-black border-b border-slate-800 whitespace-nowrap">Año</th>
+                            <th className="px-4 py-5 font-black border-b border-slate-800 whitespace-nowrap">Edad</th>
+                            <th className="px-4 py-5 font-black border-b border-slate-800 text-right whitespace-nowrap">Cap. Caja</th>
+                            <th className="px-4 py-5 font-black border-b border-slate-800 text-right whitespace-nowrap">Cap. Reserva</th>
+                            <th className="px-4 py-5 font-black border-b border-slate-800 text-right whitespace-nowrap">Rend. Caja</th>
+                            <th className="px-4 py-5 font-black border-b border-slate-800 text-right whitespace-nowrap">Rend. Res.</th>
+                            <th className="px-4 py-5 font-black border-b border-slate-800 text-right whitespace-nowrap">Ingresos</th>
+                            <th className="px-4 py-5 font-black border-b border-slate-800 text-right whitespace-nowrap">Gasto Año</th>
+                            <th className="px-4 py-5 font-black border-b border-slate-800 text-right whitespace-nowrap">Aportes</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800/50">
                           {results.tablaAnual.map((row, index) => (
                             <tr key={`${row.ano}-${row.edad}-${index}`} className="hover:bg-blue-500/5 transition-colors group">
-                              <td className="px-6 py-4 text-slate-400 font-mono group-hover:text-blue-400">
+                              <td className="px-4 py-4 text-slate-400 font-mono group-hover:text-blue-400 whitespace-nowrap text-[11px]">
                                 {index === 0 ? (
                                   <>
-                                    <span className="text-[10px] text-blue-500/70 mr-1.5 uppercase tracking-tighter font-bold">{getStartMonthName(inputs.mesInicio)}</span>
+                                    <span className="text-[9px] text-blue-500/70 mr-1 uppercase tracking-tighter font-bold">{getStartMonthName(inputs.mesInicio)}</span>
                                     <span className="text-blue-400 font-bold">{row.ano}</span>
                                   </>
                                 ) : (
                                   <>
-                                    <span className="text-[10px] text-slate-500 mr-1.5 uppercase tracking-tighter">Dic</span>
+                                    <span className="text-[9px] text-slate-500 mr-1 uppercase tracking-tighter">Dic</span>
                                     {row.ano}
                                   </>
                                 )}
                               </td>
-                              <td className="px-6 py-4 text-slate-500">{row.edad} años</td>
-                              <td className="px-6 py-4 text-emerald-400/90 text-right font-mono">
+                              <td className="px-4 py-4 text-slate-500 text-[11px] whitespace-nowrap">{row.edad} años</td>
+                              <td className="px-4 py-4 text-emerald-400/90 text-right font-mono text-[11px]">
                                 ${Math.round(row.capitalCaja).toLocaleString('de-DE')}
                               </td>
-                              <td className="px-6 py-4 text-blue-400/90 text-right font-mono">
+                              <td className="px-4 py-4 text-blue-400/90 text-right font-mono text-[11px]">
                                 ${Math.round(row.capitalReserva).toLocaleString('de-DE')}
                               </td>
-                              <td className="px-6 py-4 text-indigo-400 text-right font-mono">
-                                +${Math.round(row.rendimientoTotal).toLocaleString('de-DE')}
+                              <td className="px-4 py-4 text-emerald-500/60 text-right font-mono text-[11px]">
+                                +${Math.round(row.rendimientoCaja || 0).toLocaleString('de-DE')}
                               </td>
-                              <td className="px-6 py-4 text-slate-500 text-right">
-                                ${Math.round(row.gastosMensuales || 0).toLocaleString('de-DE')}
+                              <td className="px-4 py-4 text-blue-500/60 text-right font-mono text-[11px]">
+                                +${Math.round(row.rendimientoReserva || 0).toLocaleString('de-DE')}
+                              </td>
+                              <td className="px-4 py-4 text-slate-400 text-right font-mono text-[11px]">
+                                ${Math.round(row.ingresosTrabajo || 0).toLocaleString('de-DE')}
+                              </td>
+                              <td className="px-4 py-4 text-rose-400/70 text-right font-mono text-[11px]">
+                                ${Math.round(row.gastosAnuales || 0).toLocaleString('de-DE')}
+                              </td>
+                              <td className="px-4 py-4 text-indigo-400/80 text-right font-mono text-[11px]">
+                                ${Math.round(row.aportes || 0).toLocaleString('de-DE')}
                               </td>
                             </tr>
                           ))}
