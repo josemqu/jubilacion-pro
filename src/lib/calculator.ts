@@ -49,6 +49,7 @@ export class RetirementCalculator {
 
     let currentMonth = this.inputs.mesInicio;
     let currentYear = this.inputs.anoInicio;
+    let currentEdad = this.inputs.edadActual;
 
     for (let dia = 1; dia <= diasTotales; dia++) {
       capitalCaja *= (1 + this.tasaDiariaCaja);
@@ -76,18 +77,19 @@ export class RetirementCalculator {
           aportesOmitidos++;
         }
 
+        if (currentMonth === 5) {
+          currentEdad++;
+        }
+
         // Check if it's the end of the year (December) or the end of the simulation
         if (currentMonth === 11 || dia + 30 > diasTotales) {
-          const yearsElapsed = dia / 365;
-          const edad = this.inputs.edadActual + yearsElapsed;
-          
           const rendimientoCaja = capitalCaja - capitalCajaInicioAno - ingresosTrabajoAno + gastosAno + aportesAno;
           const rendimientoReserva = capitalReserva - capitalReservaInicioAno - aportesAno;
           const flujoNeto = ingresosTrabajoAno - gastosAno - aportesAno;
           
           datosAnuales.push({
             ano: currentYear,
-            edad: Math.round(edad * 10) / 10,
+            edad: currentEdad,
             capitalCaja: Math.round(capitalCaja * 100) / 100,
             capitalReserva: Math.round(capitalReserva * 100) / 100,
             capitalTotal: Math.round((capitalCaja + capitalReserva) * 100) / 100,
@@ -147,6 +149,7 @@ export class RetirementCalculator {
 
     let currentMonth = this.inputs.mesInicio;
     let currentYear = this.inputs.anoInicio + (this.inputs.edadJubilacion - this.inputs.edadActual);
+    let currentEdad = this.inputs.edadJubilacion;
 
     for (let dia = 1; dia <= diasTotales; dia++) {
       const interesCaja = Math.max(0, capitalCaja) * this.tasaDiariaCaja;
@@ -186,13 +189,14 @@ export class RetirementCalculator {
       }
 
       if (dia % 30 === 0) {
+        if (currentMonth === 5) {
+          currentEdad++;
+        }
+
         if (currentMonth === 11 || dia + 30 > diasTotales) {
-          const anosRetiro = dia / 365;
-          const edad = this.inputs.edadJubilacion + anosRetiro;
-          
           datosAnuales.push({
             ano: currentYear,
-            edad: Math.round(edad * 10) / 10,
+            edad: currentEdad,
             capitalCaja: Math.round(Math.max(0, capitalCaja) * 100) / 100,
             capitalReserva: Math.round(Math.max(0, capitalReserva) * 100) / 100,
             capitalTotal: Math.round(Math.max(0, capitalCaja + capitalReserva) * 100) / 100,
