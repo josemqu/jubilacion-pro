@@ -64,7 +64,15 @@ export class RetirementCalculator {
     let currentYear = this.inputs.anoInicio;
     let currentEdad = this.inputs.edadActual;
 
-    const totalMeses = anosHastaJubilacion * 12;
+    // Calculate total months until retirement age is reached
+    let tempMonth = currentMonth;
+    let tempEdad = currentEdad;
+    let totalMeses = 0;
+    while (tempEdad < this.inputs.edadJubilacion) {
+      totalMeses++;
+      if (tempMonth === 5) tempEdad++;
+      tempMonth = (tempMonth + 1) % 12;
+    }
 
     for (let mesIdx = 1; mesIdx <= totalMeses; mesIdx++) {
       // Each iteration is 1 month
@@ -163,13 +171,20 @@ export class RetirementCalculator {
       datosAnuales,
       datosMensuales,
       aportesOmitidos,
-      aportesRealizados: totalMeses - aportesOmitidos
+      aportesRealizados: totalMeses - aportesOmitidos,
+      lastMonth: currentMonth,
+      lastYear: currentYear,
+      lastEdad: currentEdad
     };
   }
 
   public simulateRetirement(
     capitalReservaInicial: number,
-    capitalCajaInicial: number
+    capitalCajaInicial: number,
+    startMonth: number,
+    startYear: number,
+    startEdad: number,
+    totalMonthsAccumulation: number
   ): RetirementResult {
     const anosJubilacion = this.inputs.esperanzaVida - this.inputs.edadJubilacion;
     const diasTotales = anosJubilacion * 365;
@@ -179,8 +194,6 @@ export class RetirementCalculator {
     const gastoDiarioJubilacion = (this.inputs.gastoMensualDeseado * 12) / 365;
     const datosAnuales: YearData[] = [];
     const datosMensuales: YearData[] = [];
-    const startYear = this.inputs.anoInicio;
-    const diasAcumulacion = (this.inputs.edadJubilacion - this.inputs.edadActual) * 365;
     
     let rendimientoCajaAno = 0;
     let rendimientoReservaAno = 0;
@@ -188,18 +201,11 @@ export class RetirementCalculator {
     let deficitAno = 0;
     let capitalAgotadoDia: number | null = null;
     
-    let currentCajaMensual = capitalCaja;
-    let currentReservaMensual = capitalReserva;
-    let rendimientoCajaMes = 0;
-    let rendimientoReservaMes = 0;
-    let gastosMes = 0;
-    let deficitMes = 0;
+    let currentMonth = startMonth;
+    let currentYear = startYear;
+    let currentEdad = startEdad;
 
-    let currentMonth = this.inputs.mesInicio;
-    let currentYear = this.inputs.anoInicio + (this.inputs.edadJubilacion - this.inputs.edadActual);
-    let currentEdad = this.inputs.edadJubilacion;
-
-    const totalMesesSimulacionAcumulacion = (this.inputs.edadJubilacion - this.inputs.edadActual) * 12;
+    const totalMesesSimulacionAcumulacion = totalMonthsAccumulation;
     const mesesRetiro = (this.inputs.esperanzaVida - this.inputs.edadJubilacion) * 12;
 
     for (let mesIdx = 1; mesIdx <= mesesRetiro; mesIdx++) {
@@ -310,7 +316,14 @@ export class RetirementCalculator {
 
   public runFullSimulation(): FullSimulationResult {
     const acumulacion = this.simulateAccumulation();
-    const retiro = this.simulateRetirement(acumulacion.capitalReservaFinal, acumulacion.capitalCajaFinal);
+    const retiro = this.simulateRetirement(
+      acumulacion.capitalReservaFinal, 
+      acumulacion.capitalCajaFinal,
+      acumulacion.lastMonth,
+      acumulacion.lastYear,
+      acumulacion.lastEdad,
+      acumulacion.datosMensuales.length - 1 // excluding initialState
+    );
     const ingresoPerpetuoMensual = this.calculatePerpetualIncome(acumulacion.capitalReservaFinal);
     
     let estado: 'excelente' | 'alcanzable' | 'insuficiente';

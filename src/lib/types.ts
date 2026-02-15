@@ -42,6 +42,9 @@ export interface AccumulationResult {
   datosMensuales: YearData[];
   aportesOmitidos: number;
   aportesRealizados: number;
+  lastMonth: number;
+  lastYear: number;
+  lastEdad: number;
 }
 
 export interface RetirementResult {
