@@ -21,11 +21,11 @@ export class RetirementCalculator {
     let capitalReserva = this.inputs.capitalInicialReserva;
     
     const datosAnuales: YearData[] = [];
-    const currentYear = new Date().getFullYear();
+    const startYear = this.inputs.anoInicio;
 
     // Estado inicial (Año 0)
     datosAnuales.push({
-      ano: currentYear,
+      ano: startYear,
       edad: this.inputs.edadActual,
       capitalCaja: Math.round(capitalCaja * 100) / 100,
       capitalReserva: Math.round(capitalReserva * 100) / 100,
@@ -76,7 +76,7 @@ export class RetirementCalculator {
 
       if (dia % 365 === 0) {
         const edad = this.inputs.edadActual + (dia / 365);
-        const anoCalendario = currentYear + (dia / 365);
+        const anoCalendario = startYear + (dia / 365);
         
         const rendimientoCaja = capitalCaja - capitalCajaInicioAno - ingresosTrabajoAno + gastosAno + aportesAno;
         const rendimientoReserva = capitalReserva - capitalReservaInicioAno - aportesAno;
@@ -127,7 +127,7 @@ export class RetirementCalculator {
     
     const gastoDiarioJubilacion = (this.inputs.gastoMensualDeseado * 12) / 365;
     const datosAnuales: YearData[] = [];
-    const currentYear = new Date().getFullYear();
+    const startYear = this.inputs.anoInicio;
     const diasAcumulacion = (this.inputs.edadJubilacion - this.inputs.edadActual) * 365;
     
     let rendimientoCajaAno = 0;
@@ -177,7 +177,7 @@ export class RetirementCalculator {
         const anosRetiro = dia / 365;
         const edad = this.inputs.edadJubilacion + anosRetiro;
         const anosDesdeInicio = this.inputs.edadJubilacion - this.inputs.edadActual;
-        const anoCalendario = currentYear + anosDesdeInicio + anosRetiro;
+        const anoCalendario = startYear + anosDesdeInicio + anosRetiro;
         
         datosAnuales.push({
           ano: anoCalendario,

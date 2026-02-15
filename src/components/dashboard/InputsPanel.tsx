@@ -1,9 +1,11 @@
 "use client";
 
 import { SliderInput } from "../ui/slider-input";
+import { MonthYearPicker } from "../ui/month-year-picker";
 import { CalculatorInputs } from "@/lib/types";
 import { motion } from "framer-motion";
-import { User, DollarSign, BarChart4, Target } from "lucide-react";
+import { User, DollarSign, BarChart4, Target, Calendar, Info } from "lucide-react";
+import * as Tooltip from "@radix-ui/react-tooltip";
 
 interface InputsPanelProps {
   inputs: CalculatorInputs;
@@ -25,6 +27,40 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
           <h3 className={titleClasses}>Parámetros de Vida</h3>
         </div>
         <div className="space-y-4">
+          <div className="space-y-3">
+            <div className="flex items-center gap-1.5">
+              <label className="text-sm font-medium text-slate-300">Fecha de Inicio</label>
+              <Tooltip.Provider delayDuration={200}>
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
+                    <button className="text-blue-500/70 hover:text-blue-400 transition-all duration-300 hover:scale-110 active:scale-95 flex items-center">
+                      <Info size={16} strokeWidth={2} />
+                    </button>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content
+                      className="z-[100] bg-slate-900 text-slate-200 p-3 rounded-xl text-xs max-w-[240px] shadow-2xl border border-slate-800 leading-relaxed select-none animate-in fade-in zoom-in-95 duration-200"
+                      sideOffset={8}
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <Info size={14} className="text-blue-500 shrink-0 mt-0.5" />
+                        <span>Mes y año para comenzar las proyecciones. Por defecto es hoy.</span>
+                      </div>
+                      <Tooltip.Arrow className="fill-slate-900" />
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
+              </Tooltip.Provider>
+            </div>
+            <MonthYearPicker
+              month={inputs.mesInicio}
+              year={inputs.anoInicio}
+              onChange={(m, y) => {
+                updateInput("mesInicio", m);
+                updateInput("anoInicio", y);
+              }}
+            />
+          </div>
           <SliderInput
             label="Edad Actual"
             value={inputs.edadActual}

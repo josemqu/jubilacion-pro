@@ -11,6 +11,8 @@ export interface CalculatorInputs {
   tasaRetornoReservaAnual: number;
   inflacionAnual: number;
   gastoMensualDeseado: number;
+  mesInicio: number;
+  anoInicio: number;
 }
 
 export interface YearData {

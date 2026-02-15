@@ -13,4 +13,6 @@ export const DEFAULT_INPUTS: CalculatorInputs = {
   tasaRetornoReservaAnual: 7,
   inflacionAnual: 3,
   gastoMensualDeseado: 2500,
+  mesInicio: new Date().getMonth(),
+  anoInicio: new Date().getFullYear(),
 };
