@@ -14,8 +14,8 @@ export interface CalculatorInputs {
   mesInicio: number;
   anoInicio: number;
 }
-
 export interface YearData {
+  mes?: number;
   ano: number;
   edad: number;
   capitalCaja: number;
@@ -38,6 +38,7 @@ export interface AccumulationResult {
   capitalReservaFinal: number;
   capitalTotalFinal: number;
   datosAnuales: YearData[];
+  datosMensuales: YearData[];
   aportesOmitidos: number;
   aportesRealizados: number;
 }
@@ -46,6 +47,7 @@ export interface RetirementResult {
   capitalFinal: number;
   anosCubiertos: number;
   datosAnuales: YearData[];
+  datosMensuales: YearData[];
   esSuficiente: boolean;
 }
 
@@ -55,4 +57,5 @@ export interface FullSimulationResult {
   ingresoPerpetuoMensual: number;
   estado: 'excelente' | 'alcanzable' | 'insuficiente';
   tablaAnual: YearData[];
+  tablaMensual: YearData[];
 }

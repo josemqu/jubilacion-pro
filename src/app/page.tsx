@@ -142,37 +142,57 @@ export default function Home() {
 
   const handleExcelExport = () => {
     try {
-      const dataToExport = results.tablaAnual.map((row, index) => ({
-        "Periodo": index === 0 ? `Inicio (${getStartMonthName(inputs.mesInicio)})` : `Dic ${row.ano}`,
-        "Año": row.ano,
-        "Edad": row.edad,
-        "Capital Caja ($)": Math.round(row.capitalCaja),
-        "Capital Reserva ($)": Math.round(row.capitalReserva),
-        "Capital Total ($)": Math.round(row.capitalTotal),
-        "Rend. Caja ($)": Math.round(row.rendimientoCaja || 0),
-        "Rend. Reserva ($)": Math.round(row.rendimientoReserva || 0),
-        "Rend. Total ($)": Math.round(row.rendimientoTotal),
-        "Ingresos Trabajo ($)": Math.round(row.ingresosTrabajo || 0),
-        "Gasto Anual ($)": Math.round(row.gastosAnuales || 0),
-        "Aportes Reserva ($)": Math.round(row.aportes || 0),
-        "Gasto Mensual ($)": Math.round(row.gastosMensuales || 0),
-        "Referencia Inflación": row.gastoMensualAjustado ? (row.gastoMensualAjustado / inputs.gastoMensualDeseado).toFixed(2) : "1.00"
-      }));
+      const dataToExport: any[] = [];
+      const rowProps: any[] = [];
+
+      // Row 1: Header (Always visible)
+      rowProps.push({ level: 0 });
+
+      results.tablaMensual.forEach((row, index) => {
+        const isStart = index === 0;
+        
+        dataToExport.push({
+          "Periodo": isStart ? `Inicio (${getStartMonthName(inputs.mesInicio)})` : `${getStartMonthName(row.mes || 0)} ${row.ano}`,
+          "Año": row.ano,
+          "Mes": getStartMonthName(row.mes || 0),
+          "Edad": row.edad,
+          "Capital Caja ($)": Math.round(row.capitalCaja),
+          "Capital Reserva ($)": Math.round(row.capitalReserva),
+          "Capital Total ($)": Math.round(row.capitalTotal),
+          "Rend. Caja ($)": Math.round(row.rendimientoCaja || 0),
+          "Rend. Reserva ($)": Math.round(row.rendimientoReserva || 0),
+          "Rend. Total ($)": Math.round(row.rendimientoTotal),
+          "Ingresos Trabajo ($)": Math.round(row.ingresosTrabajo || 0),
+          "Gasto Mes ($)": Math.round(row.gastosMensuales || 0),
+          "Gasto Anual Acum ($)": Math.round(row.gastosAnuales || 0),
+          "Aportes Reserva ($)": Math.round(row.aportes || 0),
+          "Inflación Acum (Ref)": row.gastoMensualAjustado ? (row.gastoMensualAjustado / inputs.gastoMensualDeseado).toFixed(2) : "1.00"
+        });
+
+        // Group Jan-Nov rows (level 1), keeping the annual closure (Dec) and Start visible (level 0)
+        rowProps.push({
+          level: (row.mes === 11 || isStart) ? 0 : 1
+        });
+      });
 
       const worksheet = utils.json_to_sheet(dataToExport);
       const workbook = utils.book_new();
-      utils.book_append_sheet(workbook, worksheet, "Plan de Jubilación");
+      
+      // Set row properties for grouping
+      worksheet['!rows'] = rowProps;
+
+      utils.book_append_sheet(workbook, worksheet, "Plan Detallado");
       
       worksheet["!cols"] = [ 
-        { wch: 20 }, { wch: 8 }, { wch: 8 }, { wch: 18 }, { wch: 18 }, 
+        { wch: 20 }, { wch: 8 }, { wch: 10 }, { wch: 8 }, { wch: 18 }, 
         { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 18 }, 
-        { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 15 } 
+        { wch: 18 }, { wch: 18 }, { wch: 20 }, { wch: 18 }, { wch: 18 }
       ];
 
-      writeFile(workbook, `jubilacion_pro_proyeccion.xlsx`);
+      writeFile(workbook, `jubilacion_pro_detalle_mensual.xlsx`);
     } catch (error) {
       console.error("Error exporting to Excel:", error);
-      alert("Error al generar el Excel.");
+      alert("Error al generar el Excel detallado.");
     }
   };
 

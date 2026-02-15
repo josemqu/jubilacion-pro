@@ -21,6 +21,7 @@ export class RetirementCalculator {
     let capitalReserva = this.inputs.capitalInicialReserva;
     
     const datosAnuales: YearData[] = [];
+    const datosMensuales: YearData[] = [];
     const startYear = this.inputs.anoInicio;
 
     // Estado inicial (Año 0)
@@ -46,6 +47,12 @@ export class RetirementCalculator {
     let ingresosTrabajoAno = 0;
     let gastosAno = 0;
     let aportesAno = 0;
+    
+    let currentCajaMensual = capitalCaja;
+    let currentReservaMensual = capitalReserva;
+    let gastosMes = 0;
+    let ingresosTrabajoMes = 0;
+    let aportesMes = 0;
 
     let currentMonth = this.inputs.mesInicio;
     let currentYear = this.inputs.anoInicio;
@@ -76,6 +83,31 @@ export class RetirementCalculator {
         } else {
           aportesOmitidos++;
         }
+
+        const rendimientoCajaMes = capitalCaja - currentCajaMensual - ingresosTrabajoMes + gastosMes + aportesMes;
+        const rendimientoReservaMes = capitalReserva - currentReservaMensual - aportesMes;
+
+        datosMensuales.push({
+          mes: currentMonth,
+          ano: currentYear,
+          edad: currentEdad,
+          capitalCaja: Math.round(capitalCaja * 100) / 100,
+          capitalReserva: Math.round(capitalReserva * 100) / 100,
+          capitalTotal: Math.round((capitalCaja + capitalReserva) * 100) / 100,
+          ingresosTrabajo: Math.round(ingresosTrabajoMes * 100) / 100,
+          gastosMensuales: Math.round(gastosMes * 100) / 100,
+          gastosAnuales: Math.round(gastosAno * 100) / 100,
+          aportes: Math.round(aportesMes * 100) / 100,
+          rendimientoCaja: Math.round(rendimientoCajaMes * 100) / 100,
+          rendimientoReserva: Math.round(rendimientoReservaMes * 100) / 100,
+          rendimientoTotal: Math.round((rendimientoCajaMes + rendimientoReservaMes) * 100) / 100
+        });
+
+        currentCajaMensual = capitalCaja;
+        currentReservaMensual = capitalReserva;
+        gastosMes = 0;
+        ingresosTrabajoMes = 0;
+        aportesMes = 0;
 
         if (currentMonth === 5) {
           currentEdad++;
@@ -122,6 +154,7 @@ export class RetirementCalculator {
       capitalReservaFinal: capitalReserva,
       capitalTotalFinal: capitalCaja + capitalReserva,
       datosAnuales,
+      datosMensuales,
       aportesOmitidos,
       aportesRealizados: Math.floor(diasTotales / 30) - aportesOmitidos
     };
@@ -138,6 +171,7 @@ export class RetirementCalculator {
     
     const gastoDiarioJubilacion = (this.inputs.gastoMensualDeseado * 12) / 365;
     const datosAnuales: YearData[] = [];
+    const datosMensuales: YearData[] = [];
     const startYear = this.inputs.anoInicio;
     const diasAcumulacion = (this.inputs.edadJubilacion - this.inputs.edadActual) * 365;
     
@@ -146,6 +180,13 @@ export class RetirementCalculator {
     let gastosAno = 0;
     let deficitAno = 0;
     let capitalAgotadoDia: number | null = null;
+    
+    let currentCajaMensual = capitalCaja;
+    let currentReservaMensual = capitalReserva;
+    let rendimientoCajaMes = 0;
+    let rendimientoReservaMes = 0;
+    let gastosMes = 0;
+    let deficitMes = 0;
 
     let currentMonth = this.inputs.mesInicio;
     let currentYear = this.inputs.anoInicio + (this.inputs.edadJubilacion - this.inputs.edadActual);
@@ -159,6 +200,8 @@ export class RetirementCalculator {
       capitalReserva += interesReserva;
       rendimientoCajaAno += interesCaja;
       rendimientoReservaAno += interesReserva;
+      rendimientoCajaMes += interesCaja;
+      rendimientoReservaMes += interesReserva;
       
       const diasTotalesSimulacion = diasAcumulacion + dia;
       const inflacionAcumulada = Math.pow(1 + this.tasaDiariaInflacion, diasTotalesSimulacion);
@@ -180,7 +223,9 @@ export class RetirementCalculator {
       
       const gastoReal = gastoProyectado - gastoRestante;
       gastosAno += gastoReal;
+      gastosMes += gastoReal;
       deficitAno += gastoRestante;
+      deficitMes += gastoRestante;
       
       if (capitalCaja <= 1e-9 && capitalReserva <= 1e-9 && capitalAgotadoDia === null) {
         if (gastoRestante > 0) {
@@ -189,6 +234,27 @@ export class RetirementCalculator {
       }
 
       if (dia % 30 === 0) {
+        datosMensuales.push({
+          mes: currentMonth,
+          ano: currentYear,
+          edad: currentEdad,
+          capitalCaja: Math.round(Math.max(0, capitalCaja) * 100) / 100,
+          capitalReserva: Math.round(Math.max(0, capitalReserva) * 100) / 100,
+          capitalTotal: Math.round(Math.max(0, capitalCaja + capitalReserva) * 100) / 100,
+          gastosMensuales: Math.round(gastosMes * 100) / 100,
+          gastosAnuales: Math.round(gastosAno * 100) / 100,
+          gastoMensualAjustado: Math.round((gastoProyectado * 365 / 12) * 100) / 100,
+          deficitAnual: Math.round(deficitAno * 100) / 100,
+          rendimientoCaja: Math.round(rendimientoCajaMes * 100) / 100,
+          rendimientoReserva: Math.round(rendimientoReservaMes * 100) / 100,
+          rendimientoTotal: Math.round((rendimientoCajaMes + rendimientoReservaMes) * 100) / 100
+        });
+
+        rendimientoCajaMes = 0;
+        rendimientoReservaMes = 0;
+        gastosMes = 0;
+        deficitMes = 0;
+
         if (currentMonth === 5) {
           currentEdad++;
         }
@@ -228,6 +294,7 @@ export class RetirementCalculator {
       capitalFinal: Math.max(0, capitalReserva + capitalCaja),
       anosCubiertos: Math.round(anosCubiertos * 10) / 10,
       datosAnuales,
+      datosMensuales,
       esSuficiente: capitalAgotadoDia === null
     };
   }
@@ -255,13 +322,15 @@ export class RetirementCalculator {
     }
 
     const tablaAnual = [...acumulacion.datosAnuales, ...retiro.datosAnuales];
+    const tablaMensual = [...acumulacion.datosMensuales, ...retiro.datosMensuales];
 
     return {
       acumulacion,
       retiro,
       ingresoPerpetuoMensual: Math.round(ingresoPerpetuoMensual * 100) / 100,
       estado,
-      tablaAnual
+      tablaAnual,
+      tablaMensual
     };
   }
 }
