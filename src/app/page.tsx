@@ -7,7 +7,7 @@ import { InputsPanel } from "@/components/dashboard/InputsPanel";
 import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calculator, Settings2, LineChart, LayoutDashboard, Share2, Download, Upload, RotateCcw, X, ChevronLeft, ChevronRight, Info } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import confetti from "canvas-confetti";
 import { DEFAULT_INPUTS } from "@/lib/constants";
@@ -128,6 +128,14 @@ export default function Home() {
     });
     
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const getStartMonthName = (monthIndex: number) => {
+    const months = [
+      "Ene", "Feb", "Mar", "Abr", "May", "Jun",
+      "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"
+    ];
+    return months[monthIndex];
   };
 
   if (!isLoaded) {
@@ -353,9 +361,21 @@ export default function Home() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800/50">
-                          {results.tablaAnual.map((row) => (
-                            <tr key={`${row.ano}-${row.edad}`} className="hover:bg-blue-500/5 transition-colors group">
-                              <td className="px-6 py-4 text-slate-400 font-mono group-hover:text-blue-400">{row.ano}</td>
+                          {results.tablaAnual.map((row, index) => (
+                            <tr key={`${row.ano}-${row.edad}-${index}`} className="hover:bg-blue-500/5 transition-colors group">
+                              <td className="px-6 py-4 text-slate-400 font-mono group-hover:text-blue-400">
+                                {index === 0 ? (
+                                  <>
+                                    <span className="text-[10px] text-blue-500/70 mr-1.5 uppercase tracking-tighter font-bold">{getStartMonthName(inputs.mesInicio)}</span>
+                                    <span className="text-blue-400 font-bold">{row.ano}</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <span className="text-[10px] text-slate-500 mr-1.5 uppercase tracking-tighter">Dic</span>
+                                    {row.ano}
+                                  </>
+                                )}
+                              </td>
                               <td className="px-6 py-4 text-slate-500">{row.edad} años</td>
                               <td className="px-6 py-4 text-emerald-400/90 text-right font-mono">
                                 ${Math.round(row.capitalCaja).toLocaleString('de-DE')}

@@ -47,6 +47,9 @@ export class RetirementCalculator {
     let gastosAno = 0;
     let aportesAno = 0;
 
+    let currentMonth = this.inputs.mesInicio;
+    let currentYear = this.inputs.anoInicio;
+
     for (let dia = 1; dia <= diasTotales; dia++) {
       capitalCaja *= (1 + this.tasaDiariaCaja);
       capitalReserva *= (1 + this.tasaDiariaReserva);
@@ -72,37 +75,43 @@ export class RetirementCalculator {
         } else {
           aportesOmitidos++;
         }
-      }
 
-      if (dia % 365 === 0) {
-        const edad = this.inputs.edadActual + (dia / 365);
-        const anoCalendario = startYear + (dia / 365);
-        
-        const rendimientoCaja = capitalCaja - capitalCajaInicioAno - ingresosTrabajoAno + gastosAno + aportesAno;
-        const rendimientoReserva = capitalReserva - capitalReservaInicioAno - aportesAno;
-        const flujoNeto = ingresosTrabajoAno - gastosAno - aportesAno;
-        
-        datosAnuales.push({
-          ano: anoCalendario,
-          edad: edad,
-          capitalCaja: Math.round(capitalCaja * 100) / 100,
-          capitalReserva: Math.round(capitalReserva * 100) / 100,
-          capitalTotal: Math.round((capitalCaja + capitalReserva) * 100) / 100,
-          ingresosTrabajo: Math.round(ingresosTrabajoAno * 100) / 100,
-          gastosMensuales: Math.round((gastosAno / 12) * 100) / 100,
-          gastosAnuales: Math.round(gastosAno * 100) / 100,
-          aportes: Math.round(aportesAno * 100) / 100,
-          flujoNeto: Math.round(flujoNeto * 100) / 100,
-          rendimientoCaja: Math.round(rendimientoCaja * 100) / 100,
-          rendimientoReserva: Math.round(rendimientoReserva * 100) / 100,
-          rendimientoTotal: Math.round((rendimientoCaja + rendimientoReserva) * 100) / 100
-        });
-        
-        capitalCajaInicioAno = capitalCaja;
-        capitalReservaInicioAno = capitalReserva;
-        ingresosTrabajoAno = 0;
-        gastosAno = 0;
-        aportesAno = 0;
+        // Check if it's the end of the year (December) or the end of the simulation
+        if (currentMonth === 11 || dia + 30 > diasTotales) {
+          const yearsElapsed = dia / 365;
+          const edad = this.inputs.edadActual + yearsElapsed;
+          
+          const rendimientoCaja = capitalCaja - capitalCajaInicioAno - ingresosTrabajoAno + gastosAno + aportesAno;
+          const rendimientoReserva = capitalReserva - capitalReservaInicioAno - aportesAno;
+          const flujoNeto = ingresosTrabajoAno - gastosAno - aportesAno;
+          
+          datosAnuales.push({
+            ano: currentYear,
+            edad: Math.round(edad * 10) / 10,
+            capitalCaja: Math.round(capitalCaja * 100) / 100,
+            capitalReserva: Math.round(capitalReserva * 100) / 100,
+            capitalTotal: Math.round((capitalCaja + capitalReserva) * 100) / 100,
+            ingresosTrabajo: Math.round(ingresosTrabajoAno * 100) / 100,
+            gastosMensuales: Math.round((gastosAno / 12) * 100) / 100,
+            gastosAnuales: Math.round(gastosAno * 100) / 100,
+            aportes: Math.round(aportesAno * 100) / 100,
+            flujoNeto: Math.round(flujoNeto * 100) / 100,
+            rendimientoCaja: Math.round(rendimientoCaja * 100) / 100,
+            rendimientoReserva: Math.round(rendimientoReserva * 100) / 100, // Should use the current yearly values
+            rendimientoTotal: Math.round((rendimientoCaja + rendimientoReserva) * 100) / 100
+          });
+          
+          capitalCajaInicioAno = capitalCaja;
+          capitalReservaInicioAno = capitalReserva;
+          ingresosTrabajoAno = 0;
+          gastosAno = 0;
+          aportesAno = 0;
+          
+          currentMonth = 0;
+          currentYear++;
+        } else {
+          currentMonth++;
+        }
       }
     }
 
@@ -135,6 +144,9 @@ export class RetirementCalculator {
     let gastosAno = 0;
     let deficitAno = 0;
     let capitalAgotadoDia: number | null = null;
+
+    let currentMonth = this.inputs.mesInicio;
+    let currentYear = this.inputs.anoInicio + (this.inputs.edadJubilacion - this.inputs.edadActual);
 
     for (let dia = 1; dia <= diasTotales; dia++) {
       const interesCaja = Math.max(0, capitalCaja) * this.tasaDiariaCaja;
@@ -173,31 +185,36 @@ export class RetirementCalculator {
         }
       }
 
-      if (dia % 365 === 0 || dia === diasTotales) {
-        const anosRetiro = dia / 365;
-        const edad = this.inputs.edadJubilacion + anosRetiro;
-        const anosDesdeInicio = this.inputs.edadJubilacion - this.inputs.edadActual;
-        const anoCalendario = startYear + anosDesdeInicio + anosRetiro;
-        
-        datosAnuales.push({
-          ano: anoCalendario,
-          edad,
-          capitalCaja: Math.round(Math.max(0, capitalCaja) * 100) / 100,
-          capitalReserva: Math.round(Math.max(0, capitalReserva) * 100) / 100,
-          capitalTotal: Math.round(Math.max(0, capitalCaja + capitalReserva) * 100) / 100,
-          gastosMensuales: Math.round((gastosAno / 12) * 100) / 100,
-          gastosAnuales: Math.round(gastosAno * 100) / 100,
-          gastoMensualAjustado: Math.round((gastoProyectado * 365 / 12) * 100) / 100,
-          deficitAnual: Math.round(deficitAno * 100) / 100,
-          rendimientoCaja: Math.round(rendimientoCajaAno * 100) / 100,
-          rendimientoReserva: Math.round(rendimientoReservaAno * 100) / 100,
-          rendimientoTotal: Math.round((rendimientoCajaAno + rendimientoReservaAno) * 100) / 100
-        });
-        
-        rendimientoCajaAno = 0;
-        rendimientoReservaAno = 0;
-        gastosAno = 0;
-        deficitAno = 0;
+      if (dia % 30 === 0) {
+        if (currentMonth === 11 || dia + 30 > diasTotales) {
+          const anosRetiro = dia / 365;
+          const edad = this.inputs.edadJubilacion + anosRetiro;
+          
+          datosAnuales.push({
+            ano: currentYear,
+            edad: Math.round(edad * 10) / 10,
+            capitalCaja: Math.round(Math.max(0, capitalCaja) * 100) / 100,
+            capitalReserva: Math.round(Math.max(0, capitalReserva) * 100) / 100,
+            capitalTotal: Math.round(Math.max(0, capitalCaja + capitalReserva) * 100) / 100,
+            gastosMensuales: Math.round((gastosAno / 12) * 100) / 100,
+            gastosAnuales: Math.round(gastosAno * 100) / 100,
+            gastoMensualAjustado: Math.round((gastoProyectado * 365 / 12) * 100) / 100,
+            deficitAnual: Math.round(deficitAno * 100) / 100,
+            rendimientoCaja: Math.round(rendimientoCajaAno * 100) / 100,
+            rendimientoReserva: Math.round(rendimientoReservaAno * 100) / 100,
+            rendimientoTotal: Math.round((rendimientoCajaAno + rendimientoReservaAno) * 100) / 100
+          });
+          
+          rendimientoCajaAno = 0;
+          rendimientoReservaAno = 0;
+          gastosAno = 0;
+          deficitAno = 0;
+          
+          currentMonth = 0;
+          currentYear++;
+        } else {
+          currentMonth++;
+        }
       }
     }
 

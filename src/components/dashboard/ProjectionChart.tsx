@@ -66,11 +66,17 @@ export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionCh
   const formatCurrency = (value: number) => 
     `$${(value / 1000).toFixed(0)}k`;
 
-  const { retirementYear, lastYear, retirementDataPoint } = useMemo(() => ({
-    retirementYear: data.find(d => d.edad >= retirementAge)?.ano,
-    lastYear: data[data.length - 1]?.ano,
-    retirementDataPoint: data.find(d => d.edad >= retirementAge)
-  }), [data, retirementAge]);
+  const { chartData, retirementIndex, lastIndex, retirementDataPoint } = useMemo(() => {
+    const enrichedData = data.map((d, i) => ({ ...d, index: i }));
+    const rIdx = data.findIndex(d => d.edad >= retirementAge);
+    
+    return {
+      chartData: enrichedData,
+      retirementIndex: rIdx !== -1 ? rIdx : null,
+      lastIndex: data.length - 1,
+      retirementDataPoint: rIdx !== -1 ? data[rIdx] : null
+    };
+  }, [data, retirementAge]);
 
   return (
     <div className="h-[450px] w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
@@ -92,7 +98,7 @@ export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionCh
       </div>
       
       <ResponsiveContainer width="100%" height="85%">
-        <ComposedChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+        <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="colorReserva" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
@@ -107,12 +113,13 @@ export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionCh
           <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} opacity={0.3} />
           
           <XAxis 
-            dataKey="ano" 
+            dataKey="index" 
             stroke="#475569" 
             fontSize={11} 
             tickLine={false} 
             axisLine={false}
             tick={{ fill: '#64748b' }}
+            tickFormatter={(idx) => chartData[idx]?.ano?.toString() || ""}
             interval="preserveStartEnd"
           />
           <YAxis 
@@ -139,10 +146,10 @@ export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionCh
           />
           
           {/* Visual distinction between phases */}
-          {retirementYear && (
+          {retirementIndex !== null && (
             <ReferenceArea 
-              x1={retirementYear} 
-              x2={lastYear} 
+              x1={retirementIndex} 
+              x2={lastIndex} 
               fill="rgba(244, 63, 94, 0.08)" 
               stroke="none"
             />
@@ -204,9 +211,9 @@ export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionCh
           />
 
           {/* Vertical Divider - Start of Retirement */}
-          {retirementYear && (
+          {retirementIndex !== null && (
             <ReferenceLine 
-              x={retirementYear} 
+              x={retirementIndex} 
               stroke="#f43f5e" 
               strokeWidth={3}
               label={{ 
@@ -222,9 +229,9 @@ export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionCh
           )}
 
           {/* Data Label at Retirement Start */}
-          {retirementDataPoint && (
+          {retirementDataPoint && retirementIndex !== null && (
             <ReferenceDot
-              x={retirementDataPoint.ano}
+              x={retirementIndex}
               y={retirementDataPoint.capitalTotal}
               r={5}
               fill="#f8fafc"
