@@ -11,7 +11,8 @@ import {
   ReferenceLine,
   ReferenceArea,
   Line,
-  ComposedChart
+  ComposedChart,
+  ReferenceDot
 } from "recharts";
 
 interface ProjectionChartProps {
@@ -65,9 +66,10 @@ export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionCh
   const formatCurrency = (value: number) => 
     `$${(value / 1000).toFixed(0)}k`;
 
-  const { retirementYear, lastYear } = useMemo(() => ({
+  const { retirementYear, lastYear, retirementDataPoint } = useMemo(() => ({
     retirementYear: data.find(d => d.edad >= retirementAge)?.ano,
-    lastYear: data[data.length - 1]?.ano
+    lastYear: data[data.length - 1]?.ano,
+    retirementDataPoint: data.find(d => d.edad >= retirementAge)
   }), [data, retirementAge]);
 
   return (
@@ -209,13 +211,34 @@ export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionCh
               strokeWidth={3}
               label={{ 
                 value: '➔ JUBILACIÓN', 
-                position: 'insideTopLeft', 
+                position: 'insideBottomLeft', 
                 fill: '#f43f5e', 
                 fontSize: 12, 
                 fontWeight: '900',
-                dy: 10,
+                dy: -10,
                 dx: 10
               }} 
+            />
+          )}
+
+          {/* Data Label at Retirement Start */}
+          {retirementDataPoint && (
+            <ReferenceDot
+              x={retirementDataPoint.ano}
+              y={retirementDataPoint.capitalTotal}
+              r={5}
+              fill="#f8fafc"
+              stroke="#f43f5e"
+              strokeWidth={2}
+              label={{
+                value: `$${Math.round(retirementDataPoint.capitalTotal).toLocaleString('de-DE')}`,
+                position: 'top',
+                fill: '#fff',
+                fontSize: 14,
+                fontWeight: 'bold',
+                offset: 12,
+                className: "drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+              }}
             />
           )}
 
