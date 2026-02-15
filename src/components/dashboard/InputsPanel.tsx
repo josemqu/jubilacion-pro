@@ -102,7 +102,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             label="Ingreso Mensual"
             value={inputs.ingresoMensual}
             min={0}
-            max={20000}
+            max={5000}
             step={100}
             onChange={(v) => updateInput("ingresoMensual", v)}
             format={(v) => `$${v.toLocaleString('de-DE')}`}
@@ -112,7 +112,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             label="Gasto Mensual"
             value={inputs.gastoMensual}
             min={0}
-            max={20000}
+            max={5000}
             step={100}
             onChange={(v) => updateInput("gastoMensual", v)}
             format={(v) => `$${v.toLocaleString('de-DE')}`}
@@ -162,7 +162,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             label="Reserva Actual"
             value={inputs.capitalInicialReserva}
             min={0}
-            max={500000}
+            max={100000}
             step={100}
             onChange={(v) => updateInput("capitalInicialReserva", v)}
             format={(v) => `$${v.toLocaleString('de-DE')}`}
@@ -182,8 +182,8 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             label="TNA Caja"
             value={inputs.tasaRetornoCajaAnual}
             min={0}
-            max={30}
-            step={0.5}
+            max={20}
+            step={0.1}
             onChange={(v) => updateInput("tasaRetornoCajaAnual", v)}
             suffix="%"
             tooltip="Tasa Nominal Anual estimada para tu capital en caja."
@@ -192,8 +192,8 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             label="TNA Reserva"
             value={inputs.tasaRetornoReservaAnual}
             min={0}
-            max={30}
-            step={0.5}
+            max={20}
+            step={0.1}
             onChange={(v) => updateInput("tasaRetornoReservaAnual", v)}
             suffix="%"
             tooltip="Tasa de interés anual esperada para tus inversiones de reserva."
