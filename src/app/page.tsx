@@ -166,7 +166,7 @@ export default function Home() {
           "Gasto Mes ($)": Math.round(row.gastosMensuales || 0),
           "Gasto Anual Acum ($)": Math.round(row.gastosAnuales || 0),
           "Aportes Reserva ($)": Math.round(row.aportes || 0),
-          "Inflación Acum (Ref)": row.gastoMensualAjustado ? (row.gastoMensualAjustado / inputs.gastoMensualDeseado).toFixed(2) : "1.00"
+          "Inflación Acum (Ref)": row.referenciaInflacion.toFixed(2)
         });
 
         // Group Jan-Nov rows (level 1), keeping the annual closure (Dec) and Start visible (level 0)
@@ -414,7 +414,7 @@ export default function Home() {
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <ProjectionChart data={results.tablaAnual} retirementAge={inputs.edadJubilacion} />
+                    <ProjectionChart data={results.tablaMensual} retirementAge={inputs.edadJubilacion} />
                   </motion.div>
                 ) : (
                   <motion.div

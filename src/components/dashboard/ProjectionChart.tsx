@@ -23,10 +23,13 @@ interface ProjectionChartProps {
 const CustomTooltip = React.memo(({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload as YearData;
+    const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    const monthName = data.mes !== undefined ? monthNames[data.mes] : "";
+
     return (
       <div className="bg-slate-900/95 border border-slate-700 p-4 rounded-xl shadow-2xl backdrop-blur-md min-w-[200px]">
         <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
-          <span className="text-slate-200 font-bold text-lg">Año {Math.floor(label)}</span>
+          <span className="text-slate-200 font-bold text-lg">{monthName} {data.ano}</span>
           <span className="text-slate-400 text-sm">{data.edad} años</span>
         </div>
         <div className="space-y-2">
@@ -66,15 +69,19 @@ export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionCh
   const formatCurrency = (value: number) => 
     `$${(value / 1000).toFixed(0)}k`;
 
-  const { chartData, retirementIndex, lastIndex, retirementDataPoint } = useMemo(() => {
+  const { chartData, retirementIndex, lastIndex, retirementDataPoint, decemberTicks } = useMemo(() => {
     const enrichedData = data.map((d, i) => ({ ...d, index: i }));
     const rIdx = data.findIndex(d => d.edad >= retirementAge);
+    const ticks = enrichedData
+      .filter(d => d.mes === 11)
+      .map(d => d.index);
     
     return {
       chartData: enrichedData,
       retirementIndex: rIdx !== -1 ? rIdx : null,
       lastIndex: data.length - 1,
-      retirementDataPoint: rIdx !== -1 ? data[rIdx] : null
+      retirementDataPoint: rIdx !== -1 ? data[rIdx] : null,
+      decemberTicks: ticks
     };
   }, [data, retirementAge]);
 
@@ -116,11 +123,16 @@ export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionCh
             dataKey="index" 
             stroke="#475569" 
             fontSize={11} 
-            tickLine={false} 
-            axisLine={false}
+            tickLine={{ stroke: '#334155', strokeWidth: 1 }}
+            axisLine={{ stroke: '#1e293b' }}
             tick={{ fill: '#64748b' }}
-            tickFormatter={(idx) => chartData[idx]?.ano?.toString() || ""}
-            interval="preserveStartEnd"
+            ticks={decemberTicks}
+            tickFormatter={(idx) => {
+              const d = chartData[idx];
+              return d ? d.ano.toString() : "";
+            }}
+            interval="preserveStart"
+            minTickGap={60}
           />
           <YAxis 
             stroke="#475569" 

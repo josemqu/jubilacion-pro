@@ -31,6 +31,7 @@ export interface YearData {
   rendimientoReserva: number;
   rendimientoTotal: number;
   deficitAnual?: number;
+  referenciaInflacion: number;
 }
 
 export interface AccumulationResult {
