@@ -86,8 +86,8 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             label="Aporte Reserva Jubilación"
             value={inputs.aporteMensualJubilacion}
             min={0}
-            max={5000}
-            step={100}
+            max={500}
+            step={10}
             onChange={(v) => updateInput("aporteMensualJubilacion", v)}
             format={(v) => `$${v.toLocaleString('de-DE')}`}
             tooltip="Monto que separas específicamente para ahorrar/invertir cada mes."

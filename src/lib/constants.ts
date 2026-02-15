@@ -8,7 +8,7 @@ export const DEFAULT_INPUTS: CalculatorInputs = {
   capitalInicialReserva: 20000,
   ingresoMensual: 3000,
   gastoMensual: 1500,
-  aporteMensualJubilacion: 500,
+  aporteMensualJubilacion: 100,
   tasaRetornoCajaAnual: 4,
   tasaRetornoReservaAnual: 7,
   inflacionAnual: 3,
