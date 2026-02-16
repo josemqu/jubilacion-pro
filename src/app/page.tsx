@@ -63,7 +63,7 @@ export default function Home() {
 
   // Generate preview scenarios based on the hovered input in the sidebar
   const previewScenarios = useMemo(() => {
-    if (!hoveredInput || hoveredInput === 'margenSeguridad' || hoveredInput === 'esperanzaVida' || isAdjusting) return undefined;
+    if (!hoveredInput || hoveredInput === 'esperanzaVida' || isAdjusting) return undefined;
 
     const variations = [-2, -1, 1, 2];
     const key = hoveredInput as string;
@@ -101,10 +101,11 @@ export default function Home() {
       const calc = new RetirementCalculator(p);
       return {
         data: calc.runFullSimulation().tablaMensual,
-        label
+        label,
+        dataKey: key === 'margenSeguridad' ? 'capitalTotalStressed' : 'capitalTotal'
       };
     });
-  }, [hoveredInput, inputs]);
+  }, [hoveredInput, inputs, isAdjusting]);
 
   // Fire confetti only once when state becomes excellent
   useEffect(() => {

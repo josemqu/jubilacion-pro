@@ -22,6 +22,7 @@ interface ProjectionChartProps {
   previewScenarios?: {
     data: YearData[];
     label: string;
+    dataKey?: string;
   }[];
 }
 
@@ -278,46 +279,52 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
             />
 
             {/* Ghost Lines for Preview Scenarios */}
-            {previewScenarios?.map((scenario, idx) => (
-              <Line
-                key={`preview-${idx}`}
-                data={scenario.data.map((d, i) => ({ ...d, index: i }))}
-                type="monotone"
-                dataKey="capitalTotal"
-                stroke="#64748b"
-                strokeWidth={1.5}
-                strokeOpacity={0.2}
-                strokeDasharray="4 2"
-                dot={false}
-                isAnimationActive={false}
-                legendType="none"
-              >
-                <LabelList
-                  dataKey="capitalTotal"
-                  position="top"
-                  content={(props: any) => {
-                    const { x, y, index } = props;
-                    // Use scenario.data from outer scope to avoid props.data being undefined
-                    if (index === Math.floor(scenario.data.length * 0.75)) {
-                      return (
-                        <text
-                          x={x}
-                          y={y - 10}
-                          fill="#94a3b8"
-                          fontSize={9}
-                          fontWeight="bold"
-                          textAnchor="middle"
-                          className="select-none pointer-events-none opacity-80"
-                        >
-                          {scenario.label}
-                        </text>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-              </Line>
-            ))}
+            {previewScenarios?.map((scenario, idx) => {
+              const isStressed = scenario.dataKey === 'capitalTotalStressed';
+              const strokeColor = isStressed ? "#fbbf24" : "#ffffffff";
+              const currentDataKey = scenario.dataKey || "capitalTotal";
+
+              return (
+                <Line
+                  key={`preview-${idx}`}
+                  data={scenario.data.map((d, i) => ({ ...d, index: i }))}
+                  type="monotone"
+                  dataKey={currentDataKey}
+                  stroke={strokeColor}
+                  strokeWidth={1.5}
+                  strokeOpacity={isStressed ? 0.4 : 0.2}
+                  strokeDasharray="4 2"
+                  dot={false}
+                  isAnimationActive={false}
+                  legendType="none"
+                >
+                  <LabelList
+                    dataKey={currentDataKey}
+                    position="top"
+                    content={(props: any) => {
+                      const { x, y, index } = props;
+                      // Use scenario.data from outer scope to avoid props.data being undefined
+                      if (index === Math.floor(scenario.data.length * 0.75)) {
+                        return (
+                          <text
+                            x={x}
+                            y={y - 12}
+                            fill={strokeColor}
+                            fontSize={9}
+                            fontWeight="bold"
+                            textAnchor="middle"
+                            className="select-none pointer-events-none opacity-80"
+                          >
+                            {scenario.label}
+                          </text>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                </Line>
+              );
+            })}
   
             {/* Total Line (Expected/Maxima) */}
             <Line
