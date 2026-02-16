@@ -15,6 +15,8 @@ interface SliderInputProps {
   format?: (val: number) => string;
   suffix?: string;
   tooltip?: string;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 export function SliderInput({
@@ -27,11 +29,17 @@ export function SliderInput({
   format,
   suffix = "",
   tooltip,
+  onMouseEnter,
+  onMouseLeave
 }: SliderInputProps) {
   const displayValue = format ? format(value) : `${value}${suffix}`;
 
   return (
-    <div className="space-y-3">
+    <div 
+      className="space-y-3"
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-1.5">
           <Label className="text-sm font-medium text-slate-300">

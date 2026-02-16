@@ -3,6 +3,8 @@
 import { useCalculator } from "@/hooks/use-calculator";
 import { SummaryCards } from "@/components/dashboard/SummaryCards";
 import { ProjectionChart } from "@/components/dashboard/ProjectionChart";
+import { CalculatorInputs, FullSimulationResult } from "@/lib/types";
+import { RetirementCalculator } from "@/lib/calculator";
 import { InputsPanel } from "@/components/dashboard/InputsPanel";
 import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
 import { motion, AnimatePresence } from "framer-motion";
@@ -55,6 +57,34 @@ export default function Home() {
     onConfirm: () => {},
     variant: "info"
   });
+
+  const [hoveredInput, setHoveredInput] = useState<keyof CalculatorInputs | null>(null);
+
+  // Generate preview scenarios based on the hovered input in the sidebar
+  const previewScenarios = useMemo(() => {
+    if (!hoveredInput) return undefined;
+
+    // Define variations based on the type of input
+    const variations = [-2, -1, 1, 2]; // Standard variations
+    const key = hoveredInput as string;
+    
+    return variations.map(v => {
+      const p = { ...inputs };
+      const currentVal = p[hoveredInput] as number;
+      
+      // Smart scaling of variations
+      if (key.includes('tasa') || key.includes('inflacion')) {
+        (p as any)[hoveredInput] = Math.max(0, currentVal + (v * 0.5));
+      } else if (key.includes('capital') || key.includes('ingreso') || key.includes('gasto') || key.includes('aporte')) {
+        (p as any)[hoveredInput] = Math.max(0, currentVal * (1 + (v * 0.1)));
+      } else {
+        (p as any)[hoveredInput] = Math.max(0, currentVal + v);
+      }
+      
+      const calc = new RetirementCalculator(p);
+      return calc.runFullSimulation().tablaMensual;
+    });
+  }, [hoveredInput, inputs]);
 
   // Fire confetti only once when state becomes excellent
   useEffect(() => {
@@ -347,7 +377,11 @@ export default function Home() {
               </button>
             </div>
             <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 pb-10">
-              <InputsPanel inputs={inputs} updateInput={updateInput} />
+              <InputsPanel 
+                inputs={inputs} 
+                updateInput={updateInput} 
+                onHover={setHoveredInput}
+              />
             </div>
           </div>
         </motion.aside>
@@ -455,7 +489,11 @@ export default function Home() {
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <ProjectionChart data={results.tablaMensual} retirementAge={inputs.edadJubilacion} />
+                    <ProjectionChart 
+                      data={results.tablaMensual} 
+                      retirementAge={inputs.edadJubilacion} 
+                      previewScenarios={previewScenarios}
+                    />
                   </motion.div>
                 ) : (
                   <motion.div

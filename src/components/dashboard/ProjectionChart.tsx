@@ -18,6 +18,7 @@ import {
 interface ProjectionChartProps {
   data: YearData[];
   retirementAge: number;
+  previewScenarios?: YearData[][];
 }
 
 const CustomTooltip = React.memo(({ active, payload, label }: any) => {
@@ -73,23 +74,27 @@ const CustomTooltip = React.memo(({ active, payload, label }: any) => {
 
 CustomTooltip.displayName = "CustomTooltip";
 
-export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionChartProps) => {
+export const ProjectionChart = React.memo(({ data, retirementAge, previewScenarios }: ProjectionChartProps) => {
   const formatCurrency = (value: number) => 
     `$${(value / 1000).toFixed(0)}k`;
 
-  const { chartData, retirementIndex, lastIndex, retirementDataPoint, decemberTicks } = useMemo(() => {
+  const { chartData, retirementIndex, lastIndex, retirementDataPoint, decemberTicks, maxY } = useMemo(() => {
     const enrichedData = data.map((d, i) => ({ ...d, index: i }));
     const rIdx = data.findIndex(d => d.edad >= retirementAge);
     const ticks = enrichedData
       .filter(d => d.mes === 11)
       .map(d => d.index);
     
+    // Find max value in main data for fixed Y scale
+    const maxVal = Math.max(...data.map(d => Math.max(d.capitalTotal, d.capitalTotalStressed || 0)));
+    
     return {
       chartData: enrichedData,
       retirementIndex: rIdx !== -1 ? rIdx : null,
       lastIndex: data.length - 1,
       retirementDataPoint: rIdx !== -1 ? data[rIdx] : null,
-      decemberTicks: ticks
+      decemberTicks: ticks,
+      maxY: maxVal > 0 ? maxVal * 1.1 : 1000 // 10% margin, fallback to 1000
     };
   }, [data, retirementAge]);
 
@@ -119,6 +124,9 @@ export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionCh
           
           <XAxis 
             dataKey="index" 
+            type="number"
+            domain={[0, chartData.length - 1]}
+            allowDataOverflow={true}
             stroke="#475569" 
             fontSize={11} 
             tickLine={{ stroke: '#334155', strokeWidth: 1 }}
@@ -129,8 +137,8 @@ export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionCh
               const d = chartData[idx];
               return d ? d.ano.toString() : "";
             }}
-            interval="preserveStart"
-            minTickGap={60}
+            interval={0}
+            padding={{ left: 0, right: 0 }}
           />
           <YAxis 
             stroke="#475569" 
@@ -139,6 +147,8 @@ export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionCh
             axisLine={false}
             tickFormatter={formatCurrency}
             tick={{ fill: '#64748b' }}
+            domain={[0, maxY]}
+            allowDataOverflow={true}
           />
           
           <Tooltip 
@@ -227,6 +237,23 @@ export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionCh
               activeDot={{ r: 3, fill: '#fbbf24', stroke: '#0f172a', strokeWidth: 1 }}
               isAnimationActive={false}
             />
+
+            {/* Ghost Lines for Preview Scenarios */}
+            {previewScenarios?.map((scenario, idx) => (
+              <Line
+                key={`preview-${idx}`}
+                data={scenario.map((d, i) => ({ ...d, index: i }))}
+                type="monotone"
+                dataKey="capitalTotal"
+                stroke="#64748b"
+                strokeWidth={1.5}
+                strokeOpacity={0.5}
+                strokeDasharray="3 6"
+                dot={false}
+                isAnimationActive={false}
+                legendType="none"
+              />
+            ))}
   
             {/* Total Line (Expected/Maxima) */}
             <Line
