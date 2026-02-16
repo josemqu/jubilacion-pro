@@ -36,10 +36,12 @@ export function SliderInput({
 
   return (
     <div 
-      className="space-y-3"
+      className="group relative space-y-3 p-3 -mx-3 rounded-xl transition-all duration-300 hover:bg-blue-600/5 hover:ring-1 hover:ring-blue-500/20"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
+      {/* Subtle highlight indicator */}
+      <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 bg-gradient-to-r from-blue-500/5 to-transparent transition-opacity duration-500 pointer-events-none" />
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-1.5">
           <Label className="text-sm font-medium text-slate-300">
@@ -71,7 +73,7 @@ export function SliderInput({
             </Tooltip.Provider>
           )}
         </div>
-        <span className="text-sm font-mono font-bold text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded">
+        <span className="text-sm font-mono font-bold text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded transition-all duration-300 group-hover:bg-blue-500/20 group-hover:text-blue-300 group-hover:scale-105">
           {displayValue}
         </span>
       </div>
