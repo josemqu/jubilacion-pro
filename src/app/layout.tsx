@@ -33,7 +33,10 @@ export const metadata: Metadata = {
     description: "Visualiza tu futuro financiero con nuestro simulador avanzado.",
   },
   icons: {
-    icon: "/icon.png",
+    icon: [
+      { url: "/icon.png" },
+      { url: "/favicon.ico" },
+    ],
     apple: "/icon.png",
   },
 };
