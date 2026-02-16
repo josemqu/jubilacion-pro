@@ -153,18 +153,19 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
 
               return (
                 <g>
+                  {/* Ticks starting slightly above the baseline to ensure they touch the axis line */}
                   <line 
                     x1={x} 
-                    y1={y} // Start exactly at the axis line
+                    y1={y-8} 
                     x2={x} 
-                    y2={y + (isMajor ? 8 : 4)} 
+                    y2={y + (isMajor ? 0 : -2)} 
                     stroke="#334155" 
                     strokeWidth={1} 
                   />
                   {isMajor && (
                     <text 
                       x={x} 
-                      y={y + 22} 
+                      y={y + 12} 
                       fill="#64748b" 
                       fontSize={10} 
                       textAnchor="middle"
