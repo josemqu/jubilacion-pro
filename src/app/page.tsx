@@ -73,7 +73,11 @@ export default function Home() {
       const currentVal = p[hoveredInput] as number;
       let variedValue: number;
       
-      if (key.includes('tasa') || key.includes('inflacion')) {
+      if (key === 'aporteMensualJubilacion') {
+        // Special case for savings: use fixed $100 steps for clearer sensitivity
+        variedValue = Math.max(0, currentVal + (v * 50));
+        (p as any)[hoveredInput] = variedValue;
+      } else if (key.includes('tasa') || key.includes('inflacion')) {
         variedValue = Math.max(0, currentVal + (v * 0.5));
         (p as any)[hoveredInput] = variedValue;
       } else if (key.includes('capital') || key.includes('ingreso') || key.includes('gasto') || key.includes('aporte')) {
