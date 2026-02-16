@@ -105,7 +105,7 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
       retirementDataPoint: rIdx !== -1 ? data[rIdx] : null,
       allJanuaryTicks,
       januaryTicks: filteredTicks,
-      maxY: maxVal > 0 ? maxVal * 1.1 : 1000 
+      maxY: maxVal > 0 ? maxVal * 1.5 : 1000 
     };
   }, [data, retirementAge]);
 
