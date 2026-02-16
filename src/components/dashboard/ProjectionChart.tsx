@@ -82,18 +82,18 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
   const formatCurrency = (value: number) => 
     `$${(value / 1000).toFixed(0)}k`;
 
-  const { chartData, retirementIndex, lastIndex, retirementDataPoint, decemberTicks, maxY } = useMemo(() => {
+  const { chartData, retirementIndex, lastIndex, retirementDataPoint, allJanuaryTicks, januaryTicks, maxY } = useMemo(() => {
     const enrichedData = data.map((d, i) => ({ ...d, index: i }));
     const rIdx = data.findIndex(d => d.edad >= retirementAge);
-    // Calculate ticks (December of each year) and filter to avoid collision
-    const allDecemberTicks = enrichedData
-      .filter(d => d.mes === 11)
+    // Calculate ticks (January of each year) 
+    const allJanuaryTicks = enrichedData
+      .filter(d => d.mes === 0)
       .map(d => d.index);
     
-    // Pick a step (every N years) to keep labels legible
-    const totalYears = allDecemberTicks.length;
-    const step = Math.ceil(totalYears / 10); // Aim for ~10 labels
-    const filteredTicks = allDecemberTicks.filter((_, i) => i % step === 0);
+    // Pick a step (every N years) for major labels to avoid collision
+    const totalYears = allJanuaryTicks.length;
+    const step = Math.ceil(totalYears / 10); 
+    const filteredTicks = allJanuaryTicks.filter((_, i) => i % step === 0);
     
     // Find max value in main data for fixed Y scale
     const maxVal = Math.max(...data.map(d => Math.max(d.capitalTotal, d.capitalTotalStressed || 0)));
@@ -103,8 +103,9 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
       retirementIndex: rIdx !== -1 ? rIdx : null,
       lastIndex: data.length - 1,
       retirementDataPoint: rIdx !== -1 ? data[rIdx] : null,
-      decemberTicks: filteredTicks,
-      maxY: maxVal > 0 ? maxVal * 1.1 : 1000 // 10% margin, fallback to 1000
+      allJanuaryTicks,
+      januaryTicks: filteredTicks,
+      maxY: maxVal > 0 ? maxVal * 1.1 : 1000 
     };
   }, [data, retirementAge]);
 
@@ -139,16 +140,42 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
             allowDataOverflow={true}
             stroke="#475569" 
             fontSize={11} 
-            tickLine={{ stroke: '#334155', strokeWidth: 1 }}
+            tickLine={false}
             axisLine={{ stroke: '#1e293b' }}
-            tick={{ fill: '#64748b' }}
-            ticks={decemberTicks}
-            tickFormatter={(idx) => {
-              const d = chartData[idx];
-              return d ? d.ano.toString() : "";
-            }}
+            ticks={allJanuaryTicks}
             interval={0}
             padding={{ left: 0, right: 0 }}
+            tick={(props: any) => {
+              const { x, y, payload } = props;
+              const isMajor = januaryTicks.includes(payload.value);
+              const dataPoint = chartData[payload.value];
+              if (!dataPoint) return null;
+
+              return (
+                <g>
+                  <line 
+                    x1={x} 
+                    y1={y} // Start exactly at the axis line
+                    x2={x} 
+                    y2={y + (isMajor ? 8 : 4)} 
+                    stroke="#334155" 
+                    strokeWidth={1} 
+                  />
+                  {isMajor && (
+                    <text 
+                      x={x} 
+                      y={y + 22} 
+                      fill="#64748b" 
+                      fontSize={10} 
+                      textAnchor="middle"
+                      fontWeight="bold"
+                    >
+                      {dataPoint.ano}
+                    </text>
+                  )}
+                </g>
+              );
+            }}
           />
           <YAxis 
             stroke="#475569" 
