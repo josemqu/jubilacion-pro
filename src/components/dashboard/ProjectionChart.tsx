@@ -12,13 +12,17 @@ import {
   ReferenceArea,
   Line,
   ComposedChart,
-  ReferenceDot
+  ReferenceDot,
+  LabelList
 } from "recharts";
 
 interface ProjectionChartProps {
   data: YearData[];
   retirementAge: number;
-  previewScenarios?: YearData[][];
+  previewScenarios?: {
+    data: YearData[];
+    label: string;
+  }[];
 }
 
 const CustomTooltip = React.memo(({ active, payload, label }: any) => {
@@ -242,17 +246,42 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
             {previewScenarios?.map((scenario, idx) => (
               <Line
                 key={`preview-${idx}`}
-                data={scenario.map((d, i) => ({ ...d, index: i }))}
+                data={scenario.data.map((d, i) => ({ ...d, index: i }))}
                 type="monotone"
                 dataKey="capitalTotal"
                 stroke="#64748b"
                 strokeWidth={1.5}
-                strokeOpacity={0.5}
+                strokeOpacity={0.4}
                 strokeDasharray="3 6"
                 dot={false}
                 isAnimationActive={false}
                 legendType="none"
-              />
+              >
+                <LabelList
+                  dataKey="capitalTotal"
+                  position="top"
+                  content={(props: any) => {
+                    const { x, y, index } = props;
+                    // Use scenario.data from outer scope to avoid props.data being undefined
+                    if (index === Math.floor(scenario.data.length * 0.75)) {
+                      return (
+                        <text
+                          x={x}
+                          y={y - 10}
+                          fill="#94a3b8"
+                          fontSize={9}
+                          fontWeight="bold"
+                          textAnchor="middle"
+                          className="select-none pointer-events-none opacity-80"
+                        >
+                          {scenario.label}
+                        </text>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+              </Line>
             ))}
   
             {/* Total Line (Expected/Maxima) */}

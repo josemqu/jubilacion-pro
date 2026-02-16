@@ -64,25 +64,40 @@ export default function Home() {
   const previewScenarios = useMemo(() => {
     if (!hoveredInput) return undefined;
 
-    // Define variations based on the type of input
-    const variations = [-2, -1, 1, 2]; // Standard variations
+    const variations = [-2, -1, 1, 2];
     const key = hoveredInput as string;
     
     return variations.map(v => {
       const p = { ...inputs };
       const currentVal = p[hoveredInput] as number;
+      let variedValue: number;
       
-      // Smart scaling of variations
       if (key.includes('tasa') || key.includes('inflacion')) {
-        (p as any)[hoveredInput] = Math.max(0, currentVal + (v * 0.5));
+        variedValue = Math.max(0, currentVal + (v * 0.5));
+        (p as any)[hoveredInput] = variedValue;
       } else if (key.includes('capital') || key.includes('ingreso') || key.includes('gasto') || key.includes('aporte')) {
-        (p as any)[hoveredInput] = Math.max(0, currentVal * (1 + (v * 0.1)));
+        variedValue = Math.max(0, currentVal * (1 + (v * 0.1)));
+        (p as any)[hoveredInput] = variedValue;
       } else {
-        (p as any)[hoveredInput] = Math.max(0, currentVal + v);
+        variedValue = Math.max(0, currentVal + v);
+        (p as any)[hoveredInput] = variedValue;
+      }
+
+      // Format label based on key
+      let label = "";
+      if (key.includes('tasa') || key.includes('inflacion') || key === 'margenSeguridad') {
+        label = `${variedValue.toFixed(1)}%`;
+      } else if (key.includes('edad') || key === 'esperanzaVida') {
+        label = `${Math.round(variedValue)} años`;
+      } else {
+        label = `$${Math.round(variedValue).toLocaleString('de-DE')}`;
       }
       
       const calc = new RetirementCalculator(p);
-      return calc.runFullSimulation().tablaMensual;
+      return {
+        data: calc.runFullSimulation().tablaMensual,
+        label
+      };
     });
   }, [hoveredInput, inputs]);
 
