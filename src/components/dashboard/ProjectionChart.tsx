@@ -85,9 +85,15 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
   const { chartData, retirementIndex, lastIndex, retirementDataPoint, decemberTicks, maxY } = useMemo(() => {
     const enrichedData = data.map((d, i) => ({ ...d, index: i }));
     const rIdx = data.findIndex(d => d.edad >= retirementAge);
-    const ticks = enrichedData
+    // Calculate ticks (December of each year) and filter to avoid collision
+    const allDecemberTicks = enrichedData
       .filter(d => d.mes === 11)
       .map(d => d.index);
+    
+    // Pick a step (every N years) to keep labels legible
+    const totalYears = allDecemberTicks.length;
+    const step = Math.ceil(totalYears / 10); // Aim for ~10 labels
+    const filteredTicks = allDecemberTicks.filter((_, i) => i % step === 0);
     
     // Find max value in main data for fixed Y scale
     const maxVal = Math.max(...data.map(d => Math.max(d.capitalTotal, d.capitalTotalStressed || 0)));
@@ -97,7 +103,7 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
       retirementIndex: rIdx !== -1 ? rIdx : null,
       lastIndex: data.length - 1,
       retirementDataPoint: rIdx !== -1 ? data[rIdx] : null,
-      decemberTicks: ticks,
+      decemberTicks: filteredTicks,
       maxY: maxVal > 0 ? maxVal * 1.1 : 1000 // 10% margin, fallback to 1000
     };
   }, [data, retirementAge]);
