@@ -110,16 +110,17 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
   }, [data, retirementAge]);
 
   return (
-    <div className="h-[540px] w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
-      <div className="flex justify-between items-center mb-6">
+    <div className="h-[500px] w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl flex flex-col">
+      <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] animate-pulse" />
           Evolución de Patrimonio y Escenarios de Sensibilidad
         </h3>
       </div>
       
-      <ResponsiveContainer width="100%" height="95%">
-        <ComposedChart data={chartData} margin={{ top: 20, right: 10, left: 0, bottom: 20 }}>
+      <div className="flex-1 w-full min-h-0">
+        <ResponsiveContainer width="100%" height="120%" style={{ transform: 'translateY(-50px)' }}>
+          <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 10 }}>
           <defs>
             <linearGradient id="colorReserva" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
@@ -373,7 +374,8 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
           {/* Baseline */}
           <ReferenceLine y={0} stroke="#475569" strokeWidth={1} />
         </ComposedChart>
-      </ResponsiveContainer>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 });
