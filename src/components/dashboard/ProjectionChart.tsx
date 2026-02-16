@@ -132,7 +132,7 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
             </linearGradient>
           </defs>
           
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} opacity={0.3} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} opacity={0.9} />
           
           <XAxis 
             dataKey="index" 
@@ -271,7 +271,7 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
               name="Mínimo (Stressed)"
               stroke="#fbbf24"
               strokeWidth={2}
-              strokeDasharray="5 5"
+              strokeDasharray="4 4"
               dot={false}
               activeDot={{ r: 3, fill: '#fbbf24', stroke: '#0f172a', strokeWidth: 1 }}
               isAnimationActive={false}
@@ -286,8 +286,8 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
                 dataKey="capitalTotal"
                 stroke="#64748b"
                 strokeWidth={1.5}
-                strokeOpacity={0.4}
-                strokeDasharray="3 6"
+                strokeOpacity={0.2}
+                strokeDasharray="4 2"
                 dot={false}
                 isAnimationActive={false}
                 legendType="none"
