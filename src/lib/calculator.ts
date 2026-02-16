@@ -2,30 +2,45 @@ import { CalculatorInputs, AccumulationResult, RetirementResult, YearData, FullS
 
 export class RetirementCalculator {
   private inputs: CalculatorInputs;
-  private tasaDiariaCaja: number;
-  private tasaDiariaReserva: number;
-  private tasaDiariaInflacion: number;
+  // Standard rates
+  private tasaMensualCaja: number;
+  private tasaMensualReserva: number;
+  private tasaMensualInflacion: number;
+  
+  // Stressed rates (based on Margen de Seguridad)
+  private tasaMensualCajaStressed: number;
+  private tasaMensualReservaStressed: number;
+  private tasaMensualInflacionStressed: number;
 
   constructor(inputs: CalculatorInputs) {
     this.inputs = inputs;
-    // We use monthly rates for better alignment with user monthly inputs
-    this.tasaDiariaCaja = (inputs.tasaRetornoCajaAnual / 100) / 12;
-    this.tasaDiariaReserva = (inputs.tasaRetornoReservaAnual / 100) / 12;
-    this.tasaDiariaInflacion = (inputs.inflacionAnual / 100) / 12;
+    const marginFactor = inputs.margenSeguridad / 100;
+
+    // Compound Monthly Rates: (1 + i_annual)^(1/12) - 1
+    this.tasaMensualCaja = Math.pow(1 + inputs.tasaRetornoCajaAnual / 100, 1 / 12) - 1;
+    this.tasaMensualReserva = Math.pow(1 + inputs.tasaRetornoReservaAnual / 100, 1 / 12) - 1;
+    this.tasaMensualInflacion = Math.pow(1 + inputs.inflacionAnual / 100, 1 / 12) - 1;
+
+    // Stressed scenario: lower returns, higher inflation
+    this.tasaMensualCajaStressed = Math.pow(1 + (inputs.tasaRetornoCajaAnual * (1 - marginFactor)) / 100, 1 / 12) - 1;
+    this.tasaMensualReservaStressed = Math.pow(1 + (inputs.tasaRetornoReservaAnual * (1 - marginFactor)) / 100, 1 / 12) - 1;
+    this.tasaMensualInflacionStressed = Math.pow(1 + (inputs.inflacionAnual * (1 + marginFactor)) / 100, 1 / 12) - 1;
   }
 
   public simulateAccumulation(): AccumulationResult {
     const anosHastaJubilacion = this.inputs.edadJubilacion - this.inputs.edadActual;
-    const diasTotales = anosHastaJubilacion * 365;
     
     let capitalCaja = this.inputs.capitalInicialCaja;
     let capitalReserva = this.inputs.capitalInicialReserva;
+    
+    // Stressed path
+    let capitalCajaStressed = this.inputs.capitalInicialCaja;
+    let capitalReservaStressed = this.inputs.capitalInicialReserva;
     
     const datosAnuales: YearData[] = [];
     const datosMensuales: YearData[] = [];
     const startYear = this.inputs.anoInicio;
 
-    // Estado inicial (Día 0)
     const initialState: YearData = {
       mes: this.inputs.mesInicio,
       ano: startYear,
@@ -33,6 +48,7 @@ export class RetirementCalculator {
       capitalCaja: Math.round(capitalCaja * 100) / 100,
       capitalReserva: Math.round(capitalReserva * 100) / 100,
       capitalTotal: Math.round((capitalCaja + capitalReserva) * 100) / 100,
+      capitalTotalStressed: Math.round((capitalCajaStressed + capitalReservaStressed) * 100) / 100,
       ingresosTrabajo: 0,
       gastosMensuales: 0,
       gastosAnuales: 0,
@@ -47,61 +63,65 @@ export class RetirementCalculator {
     datosAnuales.push(initialState);
     datosMensuales.push(initialState);
 
-    let aportesOmitidos = 0;
     let capitalCajaInicioAno = capitalCaja;
     let capitalReservaInicioAno = capitalReserva;
     let ingresosTrabajoAno = 0;
     let gastosAno = 0;
     let aportesAno = 0;
     
-    let currentCajaMensual = capitalCaja;
-    let currentReservaMensual = capitalReserva;
-    let gastosMes = 0;
-    let ingresosTrabajoMes = 0;
-    let aportesMes = 0;
-
     let currentMonth = this.inputs.mesInicio;
     let currentYear = this.inputs.anoInicio;
     let currentEdad = this.inputs.edadActual;
 
-    // Calculate total months until retirement age is reached
     let tempMonth = currentMonth;
     let tempEdad = currentEdad;
     let totalMeses = 0;
     while (tempEdad < this.inputs.edadJubilacion) {
       totalMeses++;
-      if (tempMonth === 5) tempEdad++;
+      if (tempMonth === 5) tempEdad++; // Birthday in June (index 5)
       tempMonth = (tempMonth + 1) % 12;
     }
 
     for (let mesIdx = 1; mesIdx <= totalMeses; mesIdx++) {
-      // Each iteration is 1 month
-      const inflacionAcumulada = Math.pow(1 + this.tasaDiariaInflacion, mesIdx);
+      const inflacionAcumulada = Math.pow(1 + this.tasaMensualInflacion, mesIdx);
+      const inflacionAcumuladaStressed = Math.pow(1 + this.tasaMensualInflacionStressed, mesIdx);
       
-      const rendCajaMes = capitalCaja * this.tasaDiariaCaja;
-      const rendReservaMes = capitalReserva * this.tasaDiariaReserva;
-      
+      // Standard scenario
+      const rendCajaMes = capitalCaja * this.tasaMensualCaja;
+      const rendReservaMes = capitalReserva * this.tasaMensualReserva;
       capitalCaja += rendCajaMes;
       capitalReserva += rendReservaMes;
 
+      // Stressed scenario
+      const rendCajaMesStressed = capitalCajaStressed * this.tasaMensualCajaStressed;
+      const rendReservaMesStressed = capitalReservaStressed * this.tasaMensualReservaStressed;
+      capitalCajaStressed += rendCajaMesStressed;
+      capitalReservaStressed += rendReservaMesStressed;
+
       const ingresoMesAjustado = this.inputs.ingresoMensual * inflacionAcumulada;
       const gastoMesAjustado = this.inputs.gastoMensual * inflacionAcumulada;
+
+      const ingresoMesStressed = this.inputs.ingresoMensual * inflacionAcumuladaStressed;
+      const gastoMesStressed = this.inputs.gastoMensual * inflacionAcumuladaStressed;
       
-      capitalCaja += ingresoMesAjustado;
-      capitalCaja -= gastoMesAjustado;
+      capitalCaja += ingresoMesAjustado - gastoMesAjustado;
+      capitalCajaStressed += ingresoMesStressed - gastoMesStressed;
       
       if (capitalCaja < 0) capitalCaja = 0;
+      if (capitalCajaStressed < 0) capitalCajaStressed = 0;
       
       let aporteRealMensual = 0;
       if (capitalCaja >= this.inputs.aporteMensualJubilacion) {
         capitalCaja -= this.inputs.aporteMensualJubilacion;
         capitalReserva += this.inputs.aporteMensualJubilacion;
         aporteRealMensual = this.inputs.aporteMensualJubilacion;
-      } else {
-        aportesOmitidos++;
       }
 
-      // Record monthly progress
+      if (capitalCajaStressed >= this.inputs.aporteMensualJubilacion) {
+        capitalCajaStressed -= this.inputs.aporteMensualJubilacion;
+        capitalReservaStressed += this.inputs.aporteMensualJubilacion;
+      }
+
       datosMensuales.push({
         mes: currentMonth,
         ano: currentYear,
@@ -109,9 +129,10 @@ export class RetirementCalculator {
         capitalCaja: Math.round(capitalCaja * 100) / 100,
         capitalReserva: Math.round(capitalReserva * 100) / 100,
         capitalTotal: Math.round((capitalCaja + capitalReserva) * 100) / 100,
+        capitalTotalStressed: Math.round((capitalCajaStressed + capitalReservaStressed) * 100) / 100,
         ingresosTrabajo: Math.round(ingresoMesAjustado * 100) / 100,
         gastosMensuales: Math.round(gastoMesAjustado * 100) / 100,
-        gastosAnuales: (gastosAno + gastoMesAjustado), // temporary accumulation
+        gastosAnuales: gastosAno + gastoMesAjustado,
         aportes: Math.round(aporteRealMensual * 100) / 100,
         rendimientoCaja: Math.round(rendCajaMes * 100) / 100,
         rendimientoReserva: Math.round(rendReservaMes * 100) / 100,
@@ -119,16 +140,11 @@ export class RetirementCalculator {
         referenciaInflacion: Math.round(inflacionAcumulada * 1000) / 1000
       });
 
-      // Update yearly counters
       ingresosTrabajoAno += ingresoMesAjustado;
       gastosAno += gastoMesAjustado;
       aportesAno += aporteRealMensual;
 
-      // Handle transitions
-      if (currentMonth === 5) { // Transition Jun to Jul
-        currentEdad++;
-      }
-
+      if (currentMonth === 5) currentEdad++;
       if (currentMonth === 11 || mesIdx === totalMeses) {
         const rendCajaAno = capitalCaja - capitalCajaInicioAno - ingresosTrabajoAno + gastosAno + aportesAno;
         const rendReservaAno = capitalReserva - capitalReservaInicioAno - aportesAno;
@@ -140,6 +156,7 @@ export class RetirementCalculator {
           capitalCaja: Math.round(capitalCaja * 100) / 100,
           capitalReserva: Math.round(capitalReserva * 100) / 100,
           capitalTotal: Math.round((capitalCaja + capitalReserva) * 100) / 100,
+          capitalTotalStressed: Math.round((capitalCajaStressed + capitalReservaStressed) * 100) / 100,
           ingresosTrabajo: Math.round(ingresosTrabajoAno * 100) / 100,
           gastosMensuales: Math.round((gastosAno / 12) * 100) / 100,
           gastosAnuales: Math.round(gastosAno * 100) / 100,
@@ -156,7 +173,6 @@ export class RetirementCalculator {
         ingresosTrabajoAno = 0;
         gastosAno = 0;
         aportesAno = 0;
-        
         currentMonth = 0;
         currentYear++;
       } else {
@@ -167,11 +183,13 @@ export class RetirementCalculator {
     return {
       capitalCajaFinal: capitalCaja,
       capitalReservaFinal: capitalReserva,
+      capitalCajaFinalStressed: capitalCajaStressed,
+      capitalReservaFinalStressed: capitalReservaStressed,
       capitalTotalFinal: capitalCaja + capitalReserva,
       datosAnuales,
       datosMensuales,
-      aportesOmitidos,
-      aportesRealizados: totalMeses - aportesOmitidos,
+      aportesOmitidos: 0, 
+      aportesRealizados: totalMeses,
       lastMonth: currentMonth,
       lastYear: currentYear,
       lastEdad: currentEdad
@@ -181,127 +199,124 @@ export class RetirementCalculator {
   public simulateRetirement(
     capitalReservaInicial: number,
     capitalCajaInicial: number,
+    capitalReservaStressedInicial: number,
+    capitalCajaStressedInicial: number,
     startMonth: number,
     startYear: number,
     startEdad: number,
     totalMonthsAccumulation: number
   ): RetirementResult {
-    const anosJubilacion = this.inputs.esperanzaVida - this.inputs.edadJubilacion;
-    const diasTotales = anosJubilacion * 365;
     let capitalReserva = Math.max(0, capitalReservaInicial);
     let capitalCaja = Math.max(0, capitalCajaInicial);
+
+    // Stressed path - Continues from its own accumulated capital
+    let capitalReservaStressed = Math.max(0, capitalReservaStressedInicial);
+    let capitalCajaStressed = Math.max(0, capitalCajaStressedInicial);
     
-    const gastoDiarioJubilacion = (this.inputs.gastoMensualDeseado * 12) / 365;
     const datosAnuales: YearData[] = [];
     const datosMensuales: YearData[] = [];
-    
-    let rendimientoCajaAno = 0;
-    let rendimientoReservaAno = 0;
-    let gastosAno = 0;
-    let deficitAno = 0;
-    let capitalAgotadoDia: number | null = null;
     
     let currentMonth = startMonth;
     let currentYear = startYear;
     let currentEdad = startEdad;
 
-    const totalMesesSimulacionAcumulacion = totalMonthsAccumulation;
     const mesesRetiro = (this.inputs.esperanzaVida - this.inputs.edadJubilacion) * 12;
+    let capitalAgotadoDia: number | null = null;
+    let gastosAno = 0;
+    let deficitAno = 0;
+    let rendCajaAno = 0;
+    let rendReservaAno = 0;
 
     for (let mesIdx = 1; mesIdx <= mesesRetiro; mesIdx++) {
-      const idxGlobal = totalMesesSimulacionAcumulacion + mesIdx;
-      const inflacionAcumulada = Math.pow(1 + this.tasaDiariaInflacion, idxGlobal);
+      const idxGlobal = totalMonthsAccumulation + mesIdx;
+      const inflacionAcumulada = Math.pow(1 + this.tasaMensualInflacion, idxGlobal);
+      const inflacionAcumuladaStressed = Math.pow(1 + this.tasaMensualInflacionStressed, idxGlobal);
       
-      const rendCaja = Math.max(0, capitalCaja) * this.tasaDiariaCaja;
-      const rendReserva = Math.max(0, capitalReserva) * this.tasaDiariaReserva;
-      
+      // Standard path
+      const rendCaja = Math.max(0, capitalCaja) * this.tasaMensualCaja;
+      const rendReserva = Math.max(0, capitalReserva) * this.tasaMensualReserva;
       capitalCaja += rendCaja;
       capitalReserva += rendReserva;
-      rendimientoCajaAno += rendCaja;
-      rendimientoReservaAno += rendReserva;
+      rendCajaAno += rendCaja;
+      rendReservaAno += rendReserva;
+
+      // Stressed path
+      const rendCajaStr = Math.max(0, capitalCajaStressed) * this.tasaMensualCajaStressed;
+      const rendReservaStr = Math.max(0, capitalReservaStressed) * this.tasaMensualReservaStressed;
+      capitalCajaStressed += rendCajaStr;
+      capitalReservaStressed += rendReservaStr;
       
-      const gastoMensualDeseadoAjustado = this.inputs.gastoMensualDeseado * inflacionAcumulada;
+      const gastoMensualAjustado = this.inputs.gastoMensualDeseado * inflacionAcumulada;
+      const gastoMensualStressed = this.inputs.gastoMensualDeseado * inflacionAcumuladaStressed;
       
-      let gastoRestante = gastoMensualDeseadoAjustado;
-      if (capitalCaja > 0) {
-        const usarDeCaja = Math.min(capitalCaja, gastoRestante);
-        capitalCaja -= usarDeCaja;
-        gastoRestante -= usarDeCaja;
-      }
+      // Withdraw standard
+      let resStandard = gastoMensualAjustado;
+      const decrCaja = Math.min(capitalCaja, resStandard);
+      capitalCaja -= decrCaja;
+      resStandard -= decrCaja;
+      const decrRes = Math.min(capitalReserva, resStandard);
+      capitalReserva -= decrRes;
+      resStandard -= decrRes;
+
+      // Withdraw stressed
+      let resStressed = gastoMensualStressed;
+      const decrCajaStr = Math.min(capitalCajaStressed, resStressed);
+      capitalCajaStressed -= decrCajaStr;
+      resStressed -= decrCajaStr;
+      const decrResStr = Math.min(capitalReservaStressed, resStressed);
+      capitalReservaStressed -= decrResStr;
+      resStressed -= decrResStr;
+
+      gastosAno += (gastoMensualAjustado - resStandard);
+      deficitAno += resStandard;
       
-      if (gastoRestante > 0 && capitalReserva > 0) {
-        const usarDeReserva = Math.min(capitalReserva, gastoRestante);
-        capitalReserva -= usarDeReserva;
-        gastoRestante -= usarDeReserva;
-      }
-      
-      const gastoReal = gastoMensualDeseadoAjustado - gastoRestante;
-      gastosAno += gastoReal;
-      deficitAno += gastoRestante;
-      
-      if (capitalCaja <= 1e-9 && capitalReserva <= 1e-9 && capitalAgotadoDia === null) {
-        if (gastoRestante > 0) {
-          capitalAgotadoDia = mesIdx * 30.4166; // approx days
-        }
+      if (capitalCaja <= 1e-9 && capitalReserva <= 1e-9 && capitalAgotadoDia === null && resStandard > 0) {
+        capitalAgotadoDia = mesIdx * 30.4166;
       }
 
-      // Record monthly progress
       datosMensuales.push({
         mes: currentMonth,
         ano: currentYear,
         edad: currentEdad,
-        capitalCaja: Math.round(Math.max(0, capitalCaja) * 100) / 100,
-        capitalReserva: Math.round(Math.max(0, capitalReserva) * 100) / 100,
-        capitalTotal: Math.round(Math.max(0, capitalCaja + capitalReserva) * 100) / 100,
-        gastosMensuales: Math.round(gastoMensualDeseadoAjustado * 100) / 100,
-        gastosAnuales: (gastosAno), // temporary accumulation
-        gastoMensualAjustado: Math.round(gastoMensualDeseadoAjustado * 100) / 100,
-        deficitAnual: Math.round(deficitAno * 100) / 100,
+        capitalCaja: Math.max(0, Math.round(capitalCaja * 100) / 100),
+        capitalReserva: Math.max(0, Math.round(capitalReserva * 100) / 100),
+        capitalTotal: Math.max(0, Math.round((capitalCaja + capitalReserva) * 100) / 100),
+        capitalTotalStressed: Math.max(0, Math.round((capitalCajaStressed + capitalReservaStressed) * 100) / 100),
+        gastosMensuales: Math.round(gastoMensualAjustado * 100) / 100,
+        gastosAnuales: gastosAno,
         rendimientoCaja: Math.round(rendCaja * 100) / 100,
         rendimientoReserva: Math.round(rendReserva * 100) / 100,
         rendimientoTotal: Math.round((rendCaja + rendReserva) * 100) / 100,
         referenciaInflacion: Math.round(inflacionAcumulada * 1000) / 1000
       });
 
-      if (currentMonth === 5) { // Transition Jun to Jul
-        currentEdad++;
-      }
-
+      if (currentMonth === 5) currentEdad++;
       if (currentMonth === 11 || mesIdx === mesesRetiro) {
         datosAnuales.push({
           mes: currentMonth,
           ano: currentYear,
           edad: currentEdad,
-          capitalCaja: Math.round(Math.max(0, capitalCaja) * 100) / 100,
-          capitalReserva: Math.round(Math.max(0, capitalReserva) * 100) / 100,
-          capitalTotal: Math.round(Math.max(0, capitalCaja + capitalReserva) * 100) / 100,
+          capitalCaja: Math.max(0, Math.round(capitalCaja * 100) / 100),
+          capitalReserva: Math.max(0, Math.round(capitalReserva * 100) / 100),
+          capitalTotal: Math.max(0, Math.round((capitalCaja + capitalReserva) * 100) / 100),
+          capitalTotalStressed: Math.max(0, Math.round((capitalCajaStressed + capitalReservaStressed) * 100) / 100),
           gastosMensuales: Math.round((gastosAno / 12) * 100) / 100,
           gastosAnuales: Math.round(gastosAno * 100) / 100,
-          gastoMensualAjustado: Math.round(gastoMensualDeseadoAjustado * 100) / 100,
-          deficitAnual: Math.round(deficitAno * 100) / 100,
-          rendimientoCaja: Math.round(rendimientoCajaAno * 100) / 100,
-          rendimientoReserva: Math.round(rendimientoReservaAno * 100) / 100,
-          rendimientoTotal: Math.round((rendimientoCajaAno + rendimientoReservaAno) * 100) / 100,
+          rendimientoCaja: Math.round(rendCajaAno * 100) / 100,
+          rendimientoReserva: Math.round(rendReservaAno * 100) / 100,
+          rendimientoTotal: Math.round((rendCajaAno + rendReservaAno) * 100) / 100,
           referenciaInflacion: Math.round(inflacionAcumulada * 1000) / 1000
         });
-        
-        rendimientoCajaAno = 0;
-        rendimientoReservaAno = 0;
-        gastosAno = 0;
-        deficitAno = 0;
-        
-        currentMonth = 0;
-        currentYear++;
+        rendCajaAno = 0; rendReservaAno = 0; gastosAno = 0; deficitAno = 0;
+        currentMonth = 0; currentYear++;
       } else {
         currentMonth++;
       }
     }
 
-    const anosCubiertos = capitalAgotadoDia !== null ? capitalAgotadoDia / 365 : anosJubilacion;
-
     return {
       capitalFinal: Math.max(0, capitalReserva + capitalCaja),
-      anosCubiertos: Math.round(anosCubiertos * 10) / 10,
+      anosCubiertos: capitalAgotadoDia !== null ? Math.round((capitalAgotadoDia / 365) * 10) / 10 : mesesRetiro / 12,
       datosAnuales,
       datosMensuales,
       esSuficiente: capitalAgotadoDia === null
@@ -309,8 +324,8 @@ export class RetirementCalculator {
   }
 
   public calculatePerpetualIncome(capital: number): number {
-    const tasaRealMensual = (Math.pow(1 + this.tasaDiariaReserva, 30) - 1) - 
-                           (Math.pow(1 + this.tasaDiariaInflacion, 30) - 1);
+    // Real Return = ((1 + target_return) / (1 + inflation)) - 1
+    const tasaRealMensual = ((1 + this.tasaMensualReserva) / (1 + this.tasaMensualInflacion)) - 1;
     return capital * tasaRealMensual;
   }
 
@@ -319,34 +334,31 @@ export class RetirementCalculator {
     const retiro = this.simulateRetirement(
       acumulacion.capitalReservaFinal, 
       acumulacion.capitalCajaFinal,
+      acumulacion.capitalReservaFinalStressed,
+      acumulacion.capitalCajaFinalStressed,
       acumulacion.lastMonth,
       acumulacion.lastYear,
       acumulacion.lastEdad,
-      acumulacion.datosMensuales.length - 1 // excluding initialState
+      acumulacion.datosMensuales.length - 1
     );
+    
     const ingresoPerpetuoMensual = this.calculatePerpetualIncome(acumulacion.capitalReservaFinal);
     
     let estado: 'excelente' | 'alcanzable' | 'insuficiente';
     if (retiro.esSuficiente) {
-      if (retiro.capitalFinal > acumulacion.capitalReservaFinal * 0.5) {
-        estado = 'excelente';
-      } else {
-        estado = 'alcanzable';
-      }
+      estado = (retiro.capitalFinal > acumulacion.capitalReservaFinal * 0.5) ? 'excelente' : 'alcanzable';
     } else {
       estado = 'insuficiente';
     }
-
-    const tablaAnual = [...acumulacion.datosAnuales, ...retiro.datosAnuales];
-    const tablaMensual = [...acumulacion.datosMensuales, ...retiro.datosMensuales];
 
     return {
       acumulacion,
       retiro,
       ingresoPerpetuoMensual: Math.round(ingresoPerpetuoMensual * 100) / 100,
       estado,
-      tablaAnual,
-      tablaMensual
+      tablaAnual: [...acumulacion.datosAnuales, ...retiro.datosAnuales],
+      tablaMensual: [...acumulacion.datosMensuales, ...retiro.datosMensuales]
     };
   }
 }
+

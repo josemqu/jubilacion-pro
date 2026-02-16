@@ -47,9 +47,17 @@ const CustomTooltip = React.memo(({ active, payload, label }: any) => {
             </div>
             <span className="text-emerald-400 font-mono font-bold">${Math.round(data.capitalCaja).toLocaleString('de-DE')}</span>
           </div>
-          <div className="mt-2 pt-2 border-t border-slate-800 flex justify-between items-center bg-slate-800/30 -mx-4 px-4 py-2">
-            <span className="text-slate-200 text-xs font-bold uppercase tracking-tight">Total</span>
-            <span className="text-white font-mono text-sm font-black">${Math.round(data.capitalTotal).toLocaleString('de-DE')}</span>
+          <div className="mt-2 pt-2 border-t border-slate-800 space-y-2 bg-slate-800/30 -mx-4 px-4 py-2">
+            <div className="flex justify-between items-center">
+              <span className="text-slate-200 text-[10px] font-bold uppercase tracking-tight">Total Esperado</span>
+              <span className="text-white font-mono text-sm font-black">${Math.round(data.capitalTotal).toLocaleString('de-DE')}</span>
+            </div>
+            {data.capitalTotalStressed !== undefined && (
+              <div className="flex justify-between items-center opacity-80">
+                <span className="text-amber-400/80 text-[10px] font-bold uppercase tracking-tight">Escenario Conservador</span>
+                <span className="text-amber-400 font-mono text-xs font-bold">${Math.round(data.capitalTotalStressed).toLocaleString('de-DE')}</span>
+              </div>
+            )}
           </div>
           {data.gastosAnuales > 0 && (
             <div className="text-[10px] text-slate-500 italic mt-1 text-right">
@@ -86,26 +94,16 @@ export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionCh
   }, [data, retirementAge]);
 
   return (
-    <div className="h-[450px] w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+    <div className="h-[540px] w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] animate-pulse" />
-          Evolución de Patrimonio Proyectada
+          Evolución de Patrimonio y Escenarios de Sensibilidad
         </h3>
-        <div className="flex items-center gap-4 text-[10px] uppercase tracking-widest font-bold">
-          <div className="flex items-center gap-1.5 text-slate-500">
-            <div className="w-3 h-1 bg-slate-800 border border-slate-700/50" />
-            Acumulación
-          </div>
-          <div className="flex items-center gap-1.5 text-rose-500/70">
-            <div className="w-3 h-1 bg-rose-500/10 border border-rose-500/20" />
-            Jubilación
-          </div>
-        </div>
       </div>
       
-      <ResponsiveContainer width="100%" height="85%">
-        <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+      <ResponsiveContainer width="100%" height="95%">
+        <ComposedChart data={chartData} margin={{ top: 20, right: 10, left: 0, bottom: 20 }}>
           <defs>
             <linearGradient id="colorReserva" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
@@ -152,75 +150,96 @@ export const ProjectionChart = React.memo(({ data, retirementAge }: ProjectionCh
           <Legend 
             verticalAlign="top" 
             align="right" 
-            height={36} 
+            height={40} 
             iconType="circle"
-            wrapperStyle={{ paddingTop: '0', fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}
+            wrapperStyle={{ 
+              top: -45, 
+              right: 0,
+              fontSize: '10px', 
+              color: '#94a3b8', 
+              textTransform: 'uppercase', 
+              letterSpacing: '0.1em',
+              fontWeight: 'bold'
+            }}
           />
-          
-          {/* Visual distinction between phases */}
-          {retirementIndex !== null && (
-            <ReferenceArea 
-              x1={retirementIndex} 
-              x2={lastIndex} 
-              fill="rgba(244, 63, 94, 0.08)" 
+            
+            {/* Visual distinction between phases */}
+            {retirementIndex !== null && (
+              <ReferenceArea 
+                x1={retirementIndex} 
+                x2={lastIndex} 
+                fill="rgba(244, 63, 94, 0.08)" 
+                stroke="none"
+              />
+            )}
+  
+            {/* Background Areas (Stacked) */}
+            <Area
+              type="monotone"
+              dataKey="capitalReserva"
+              stackId="1"
               stroke="none"
+              fill="url(#colorReserva)"
+              legendType="none"
+              isAnimationActive={false}
             />
-          )}
-
-          {/* Background Areas (Stacked) */}
-          <Area
-            type="monotone"
-            dataKey="capitalReserva"
-            stackId="1"
-            stroke="none"
-            fill="url(#colorReserva)"
-            legendType="none"
-            isAnimationActive={false}
-          />
-          <Area
-            type="monotone"
-            dataKey="capitalCaja"
-            stackId="1"
-            stroke="none"
-            fill="url(#colorCaja)"
-            legendType="none"
-            isAnimationActive={false}
-          />
-
-          {/* Individual Curves */}
-          <Line
-            type="monotone"
-            dataKey="capitalReserva"
-            name="Reserva"
-            stroke="#3b82f6"
-            strokeWidth={3}
-            dot={false}
-            activeDot={{ r: 5, strokeWidth: 0 }}
-            isAnimationActive={false}
-          />
-          <Line
-            type="monotone"
-            dataKey="capitalCaja"
-            name="Caja"
-            stroke="#10b981"
-            strokeWidth={3}
-            dot={false}
-            activeDot={{ r: 5, strokeWidth: 0 }}
-            isAnimationActive={false}
-          />
-          
-          {/* Total Line */}
-          <Line
-            type="monotone"
-            dataKey="capitalTotal"
-            name="Total"
-            stroke="#f8fafc"
-            strokeWidth={2}
-            strokeDasharray="4 4"
-            dot={false}
-            activeDot={{ r: 4, fill: '#f8fafc', stroke: '#0f172a', strokeWidth: 2 }}
-            isAnimationActive={false}
-          />
+            <Area
+              type="monotone"
+              dataKey="capitalCaja"
+              stackId="1"
+              stroke="none"
+              fill="url(#colorCaja)"
+              legendType="none"
+              isAnimationActive={false}
+            />
+  
+            {/* Individual Curves */}
+            <Line
+              type="monotone"
+              dataKey="capitalReserva"
+              name="Reserva"
+              stroke="#3b82f6"
+              strokeWidth={3}
+              dot={false}
+              activeDot={{ r: 5, strokeWidth: 0 }}
+              isAnimationActive={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="capitalCaja"
+              name="Caja"
+              stroke="#10b981"
+              strokeWidth={3}
+              dot={false}
+              activeDot={{ r: 5, strokeWidth: 0 }}
+              isAnimationActive={false}
+            />
+            
+            {/* Stressed Total Line (Minima) */}
+            <Line
+              type="monotone"
+              dataKey="capitalTotalStressed"
+              name="Mínimo (Stressed)"
+              stroke="#fbbf24"
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              dot={false}
+              activeDot={{ r: 3, fill: '#fbbf24', stroke: '#0f172a', strokeWidth: 1 }}
+              isAnimationActive={false}
+            />
+  
+            {/* Total Line (Expected/Maxima) */}
+            <Line
+              type="monotone"
+              dataKey="capitalTotal"
+              name="Máximo (Esperado)"
+              stroke="#f8fafc"
+              strokeWidth={2}
+              strokeDasharray="4 4"
+              dot={false}
+              activeDot={{ r: 4, fill: '#f8fafc', stroke: '#0f172a', strokeWidth: 2 }}
+              isAnimationActive={false}
+            />
 
           {/* Vertical Divider - Start of Retirement */}
           {retirementIndex !== null && (

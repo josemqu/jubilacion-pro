@@ -13,6 +13,7 @@ export interface CalculatorInputs {
   gastoMensualDeseado: number;
   mesInicio: number;
   anoInicio: number;
+  margenSeguridad: number;
 }
 export interface YearData {
   mes?: number;
@@ -21,6 +22,7 @@ export interface YearData {
   capitalCaja: number;
   capitalReserva: number;
   capitalTotal: number;
+  capitalTotalStressed?: number;
   ingresosTrabajo?: number;
   gastosMensuales: number;
   gastosAnuales: number;
@@ -37,6 +39,8 @@ export interface YearData {
 export interface AccumulationResult {
   capitalCajaFinal: number;
   capitalReservaFinal: number;
+  capitalCajaFinalStressed: number;
+  capitalReservaFinalStressed: number;
   capitalTotalFinal: number;
   datosAnuales: YearData[];
   datosMensuales: YearData[];

@@ -178,6 +178,15 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
           <h3 className={titleClasses}>Economía (%)</h3>
         </div>
         <div className="space-y-4">
+          <div className="p-3 bg-blue-500/5 rounded-xl border border-blue-500/10 mb-2">
+            <p className="text-[10px] text-blue-400 font-bold uppercase tracking-tighter leading-tight flex items-center gap-2">
+              <Info size={12} />
+              Precisión Actuarial: Tasa Compuesta
+            </p>
+            <p className="text-[9px] text-slate-500 mt-1.5 leading-relaxed">
+              Calculamos la equivalencia de tasas mediante la fórmula: i_m = (1 + i_a)^(1/12) - 1. Este método captura el crecimiento exponencial real de tus activos, ofreciendo una proyección mucho más exacta que el promedio lineal simple.
+            </p>
+          </div>
           <SliderInput
             label="TNA Caja"
             value={inputs.tasaRetornoCajaAnual}
@@ -186,7 +195,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             step={0.1}
             onChange={(v) => updateInput("tasaRetornoCajaAnual", v)}
             suffix="%"
-            tooltip="Tasa Nominal Anual estimada para tu capital en caja."
+            tooltip="Tasa Nominal Anual estimada. Calculada como tasa efectiva mensual compuesta."
           />
           <SliderInput
             label="TNA Reserva"
@@ -196,7 +205,7 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             step={0.1}
             onChange={(v) => updateInput("tasaRetornoReservaAnual", v)}
             suffix="%"
-            tooltip="Tasa de interés anual esperada para tus inversiones de reserva."
+            tooltip="Rentabilidad anual esperada de tus activos de inversión, capitalizada mensualmente."
           />
           <SliderInput
             label="Inflación"
@@ -206,8 +215,33 @@ export function InputsPanel({ inputs, updateInput }: InputsPanelProps) {
             step={0.1}
             onChange={(v) => updateInput("inflacionAnual", v)}
             suffix="%"
-            tooltip="Inflación anual promedio estimada. Afectará el poder de compra futuro."
+            tooltip="Ajuste de precios anual. Se aplica de forma compuesta para proyectar el poder adquisitivo real."
           />
+        </div>
+      </section>
+
+      {/* Riesgo y Seguridad */}
+      <section className={sectionClasses}>
+        <div className={headerClasses}>
+          <div className="p-1.5 bg-blue-900/30 rounded-md text-blue-400">
+            <Target size={16} />
+          </div>
+          <h3 className={titleClasses}>Seguridad del Plan</h3>
+        </div>
+        <div className="space-y-4">
+          <SliderInput
+            label="Margen de Seguridad"
+            value={inputs.margenSeguridad}
+            min={0}
+            max={50}
+            step={1}
+            onChange={(v) => updateInput("margenSeguridad", v)}
+            suffix="%"
+            tooltip="Factor de estrés que reduce los retornos y aumenta la inflación en la línea de seguridad (mínima) del gráfico."
+          />
+          <div className="px-1 italic text-[10px] text-slate-500 leading-normal">
+            A mayor margen, más conservador es el escenario de "mínima" en tu proyección de patrimonio.
+          </div>
         </div>
       </section>
     </div>
