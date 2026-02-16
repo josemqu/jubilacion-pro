@@ -62,7 +62,7 @@ export default function Home() {
 
   // Generate preview scenarios based on the hovered input in the sidebar
   const previewScenarios = useMemo(() => {
-    if (!hoveredInput) return undefined;
+    if (!hoveredInput || hoveredInput === 'margenSeguridad') return undefined;
 
     const variations = [-2, -1, 1, 2];
     const key = hoveredInput as string;
