@@ -11,7 +11,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import confetti from "canvas-confetti";
 import { DEFAULT_INPUTS } from "@/lib/constants";
-import { utils, writeFile } from "xlsx";
+import * as XLSX from "xlsx-js-style";
 import { FileSpreadsheet } from "lucide-react";
 
 function NavButtonTooltip({ children, content }: { children: React.ReactNode; content: string }) {
@@ -150,8 +150,10 @@ export default function Home() {
 
       results.tablaMensual.forEach((row, index) => {
         const isStart = index === 0;
+        const d = new Date(inputs.anoInicio, inputs.mesInicio + index, 1);
         
         dataToExport.push({
+          "Fecha": d,
           "Periodo": isStart ? `Inicio (${getStartMonthName(inputs.mesInicio)})` : `${getStartMonthName(row.mes || 0)} ${row.ano}`,
           "Año": row.ano,
           "Mes": getStartMonthName(row.mes || 0),
@@ -166,7 +168,7 @@ export default function Home() {
           "Gasto Mes ($)": Math.round(row.gastosMensuales || 0),
           "Gasto Anual Acum ($)": Math.round(row.gastosAnuales || 0),
           "Aportes Reserva ($)": Math.round(row.aportes || 0),
-          "Inflación Acum (Ref)": row.referenciaInflacion.toFixed(2)
+          "Inflación Acum (Ref)": parseFloat(row.referenciaInflacion.toFixed(4))
         });
 
         // Group Jan-Nov rows (level 1), keeping the annual closure (Dec) and Start visible (level 0)
@@ -175,21 +177,53 @@ export default function Home() {
         });
       });
 
-      const worksheet = utils.json_to_sheet(dataToExport);
-      const workbook = utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(dataToExport, { cellDates: true });
+      const workbook = XLSX.utils.book_new();
       
       // Set row properties for grouping
       worksheet['!rows'] = rowProps;
 
-      utils.book_append_sheet(workbook, worksheet, "Plan Detallado");
+      // Apply styles to headers
+      const range = XLSX.utils.decode_range(worksheet['!ref']!);
+      const headerColor = "3070A9";
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const address = XLSX.utils.encode_cell({ r: 0, c: C });
+        if (!worksheet[address]) continue;
+        worksheet[address].s = {
+          font: { bold: true, color: { rgb: "FFFFFF" } },
+          fill: { fgColor: { rgb: headerColor } },
+          alignment: { horizontal: "center", vertical: "center" }
+        };
+      }
+
+      // Format cells
+      for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+        // Format Fecha column (C=0)
+        const dateAddr = XLSX.utils.encode_cell({ r: R, c: 0 });
+        if (worksheet[dateAddr]) {
+          worksheet[dateAddr].z = "dd/mm/YYYY";
+        }
+
+        // Format Inflación column (C=15) - Use standard number format
+        // Excel will show dot or comma based on user local settings if sent as number
+        const inflAddr = XLSX.utils.encode_cell({ r: R, c: 15 });
+        if (worksheet[inflAddr]) {
+          worksheet[inflAddr].z = "0.00"; // Internal Excel format always uses dot, but displays based on OS
+        }
+      }
+
+      // Freeze first row and first column
+      worksheet["!views"] = [{ state: "frozen", ySplit: 1, xSplit: 1 }];
+
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Plan Detallado");
       
       worksheet["!cols"] = [ 
-        { wch: 20 }, { wch: 8 }, { wch: 10 }, { wch: 8 }, { wch: 18 }, 
+        { wch: 12 }, { wch: 20 }, { wch: 8 }, { wch: 10 }, { wch: 8 }, 
         { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 18 }, 
-        { wch: 18 }, { wch: 18 }, { wch: 20 }, { wch: 18 }, { wch: 18 }
+        { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 20 }, { wch: 18 }, { wch: 18 }
       ];
 
-      writeFile(workbook, `jubilacion_pro_detalle_mensual.xlsx`);
+      XLSX.writeFile(workbook, `jubilacion_pro_detalle_mensual.xlsx`);
     } catch (error) {
       console.error("Error exporting to Excel:", error);
       alert("Error al generar el Excel detallado.");
