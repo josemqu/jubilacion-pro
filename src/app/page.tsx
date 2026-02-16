@@ -355,8 +355,9 @@ export default function Home() {
         {/* Floating Toggle Button (visible when sidebar is closed) */}
         {!isSidebarOpen && (
           <motion.button
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
             onClick={() => setIsSidebarOpen(true)}
             className="absolute left-4 bottom-4 z-40 p-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full shadow-2xl shadow-blue-500/40 transition-transform hover:scale-110 hidden lg:flex items-center gap-2"
           >
@@ -406,37 +407,43 @@ export default function Home() {
                   </h2>
                 </div>
 
-                <div className="flex bg-slate-900/50 p-1 rounded-xl border border-slate-800/50 backdrop-blur-sm">
-                  <button 
-                    onClick={() => setActiveTab("projection")}
-                    className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
-                      activeTab === "projection" 
-                        ? "bg-blue-600 text-white shadow-lg shadow-blue-900/20" 
-                        : "text-slate-500 hover:text-slate-300"
-                    }`}
-                  >
-                    Gráfico
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab("details")}
-                    className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
-                      activeTab === "details" 
-                        ? "bg-blue-600 text-white shadow-lg shadow-blue-900/20" 
-                        : "text-slate-500 hover:text-slate-300"
-                    }`}
-                  >
-                    Tabla
-                  </button>
+                <div className="flex items-center gap-3">
+                  {activeTab === "details" && (
+                    <motion.button 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.2 }}
+                      onClick={handleExcelExport}
+                      className="flex items-center gap-2 px-3 py-1 bg-emerald-600/10 hover:bg-emerald-600/20 text-[10px] font-bold text-emerald-400 rounded-lg transition-all border border-emerald-500/20 uppercase tracking-wider"
+                    >
+                      <FileSpreadsheet size={12} />
+                      <span>Excel</span>
+                    </motion.button>
+                  )}
+
+                  <div className="flex bg-slate-900/50 p-1 rounded-xl border border-slate-800/50 backdrop-blur-sm">
+                    <button 
+                      onClick={() => setActiveTab("projection")}
+                      className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
+                        activeTab === "projection" 
+                          ? "bg-blue-600 text-white shadow-lg shadow-blue-900/20" 
+                          : "text-slate-500 hover:text-slate-300"
+                      }`}
+                    >
+                      Gráfico
+                    </button>
+                    <button 
+                      onClick={() => setActiveTab("details")}
+                      className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
+                        activeTab === "details" 
+                          ? "bg-blue-600 text-white shadow-lg shadow-blue-900/20" 
+                          : "text-slate-500 hover:text-slate-300"
+                      }`}
+                    >
+                      Tabla
+                    </button>
+                  </div>
                 </div>
-                {activeTab === "details" && (
-                  <button 
-                    onClick={handleExcelExport}
-                    className="flex items-center gap-2 px-3 py-1 bg-emerald-600/10 hover:bg-emerald-600/20 text-[10px] font-bold text-emerald-400 rounded-lg transition-all border border-emerald-500/20 uppercase tracking-wider"
-                  >
-                    <FileSpreadsheet size={12} />
-                    <span>Excel</span>
-                  </button>
-                )}
               </div>
               
               <AnimatePresence mode="wait">
