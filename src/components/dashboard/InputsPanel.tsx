@@ -11,9 +11,10 @@ interface InputsPanelProps {
   inputs: CalculatorInputs;
   updateInput: (key: keyof CalculatorInputs, value: number) => void;
   onHover?: (key: keyof CalculatorInputs | null) => void;
+  onAdjustingChange?: (adjusting: boolean) => void;
 }
 
-export function InputsPanel({ inputs, updateInput, onHover }: InputsPanelProps) {
+export function InputsPanel({ inputs, updateInput, onHover, onAdjustingChange }: InputsPanelProps) {
   const sectionClasses = "bg-slate-900/50 border border-slate-800/50 p-6 rounded-2xl space-y-6";
   const headerClasses = "flex items-center gap-2 mb-2";
   const iconClasses = "p-1.5 bg-slate-800 rounded-md text-slate-400";
@@ -70,6 +71,7 @@ export function InputsPanel({ inputs, updateInput, onHover }: InputsPanelProps) 
             onChange={(v) => updateInput("edadActual", v)}
             onMouseEnter={() => onHover?.("edadActual")}
             onMouseLeave={() => onHover?.(null)}
+            onAdjustingChange={onAdjustingChange}
             suffix=" años"
             tooltip="Tu edad actual para comenzar los cálculos desde hoy."
           />
@@ -81,6 +83,7 @@ export function InputsPanel({ inputs, updateInput, onHover }: InputsPanelProps) 
             onChange={(v) => updateInput("edadJubilacion", v)}
             onMouseEnter={() => onHover?.("edadJubilacion")}
             onMouseLeave={() => onHover?.(null)}
+            onAdjustingChange={onAdjustingChange}
             suffix=" años"
             tooltip="La edad en la que planeas dejar de trabajar y empezar a usar tus ahorros."
           />
@@ -92,6 +95,7 @@ export function InputsPanel({ inputs, updateInput, onHover }: InputsPanelProps) 
             onChange={(v) => updateInput("esperanzaVida", v)}
             onMouseEnter={() => onHover?.("esperanzaVida")}
             onMouseLeave={() => onHover?.(null)}
+            onAdjustingChange={onAdjustingChange}
             suffix=" años"
             tooltip="Utilizado para calcular hasta qué edad debe durar tu capital."
           />
@@ -114,6 +118,7 @@ export function InputsPanel({ inputs, updateInput, onHover }: InputsPanelProps) 
             onChange={(v) => updateInput("ingresoMensual", v)}
             onMouseEnter={() => onHover?.("ingresoMensual")}
             onMouseLeave={() => onHover?.(null)}
+            onAdjustingChange={onAdjustingChange}
             format={(v) => `$${v.toLocaleString('de-DE')}`}
             tooltip="Tus ingresos netos totales por mes (sueldo, rentas, etc.)."
           />
@@ -126,6 +131,7 @@ export function InputsPanel({ inputs, updateInput, onHover }: InputsPanelProps) 
             onChange={(v) => updateInput("gastoMensual", v)}
             onMouseEnter={() => onHover?.("gastoMensual")}
             onMouseLeave={() => onHover?.(null)}
+            onAdjustingChange={onAdjustingChange}
             format={(v) => `$${v.toLocaleString('de-DE')}`}
             tooltip="Tus gastos de vida actuales por mes."
           />
@@ -133,11 +139,12 @@ export function InputsPanel({ inputs, updateInput, onHover }: InputsPanelProps) 
             label="Aporte Reserva Jubilación"
             value={inputs.aporteMensualJubilacion}
             min={0}
-            max={5000}
-            step={10}
+            max={500}
+            step={50}
             onChange={(v) => updateInput("aporteMensualJubilacion", v)}
             onMouseEnter={() => onHover?.("aporteMensualJubilacion")}
             onMouseLeave={() => onHover?.(null)}
+            onAdjustingChange={onAdjustingChange}
             format={(v) => `$${v.toLocaleString('de-DE')}`}
             tooltip="Monto que separas específicamente para ahorrar/invertir cada mes."
           />
@@ -150,6 +157,7 @@ export function InputsPanel({ inputs, updateInput, onHover }: InputsPanelProps) 
             onChange={(v) => updateInput("gastoMensualDeseado", v)}
             onMouseEnter={() => onHover?.("gastoMensualDeseado")}
             onMouseLeave={() => onHover?.(null)}
+            onAdjustingChange={onAdjustingChange}
             format={(v) => `$${v.toLocaleString('de-DE')}`}
             tooltip="El nivel de gasto mensual que aspiras tener una vez jubilado (a valores de hoy)."
           />
@@ -172,6 +180,7 @@ export function InputsPanel({ inputs, updateInput, onHover }: InputsPanelProps) 
             onChange={(v) => updateInput("capitalInicialCaja", v)}
             onMouseEnter={() => onHover?.("capitalInicialCaja")}
             onMouseLeave={() => onHover?.(null)}
+            onAdjustingChange={onAdjustingChange}
             format={(v) => `$${v.toLocaleString('de-DE')}`}
             tooltip="Dinero en efectivo o cuentas de alta liquidez disponibles hoy."
           />
@@ -184,6 +193,7 @@ export function InputsPanel({ inputs, updateInput, onHover }: InputsPanelProps) 
             onChange={(v) => updateInput("capitalInicialReserva", v)}
             onMouseEnter={() => onHover?.("capitalInicialReserva")}
             onMouseLeave={() => onHover?.(null)}
+            onAdjustingChange={onAdjustingChange}
             format={(v) => `$${v.toLocaleString('de-DE')}`}
             tooltip="Inversiones, plazos fijos o ahorros de largo plazo que ya posees."
           />
@@ -206,6 +216,7 @@ export function InputsPanel({ inputs, updateInput, onHover }: InputsPanelProps) 
             onChange={(v) => updateInput("tasaRetornoCajaAnual", v)}
             onMouseEnter={() => onHover?.("tasaRetornoCajaAnual")}
             onMouseLeave={() => onHover?.(null)}
+            onAdjustingChange={onAdjustingChange}
             suffix="%"
             tooltip="Tasa Nominal Anual estimada. Calculada como tasa efectiva mensual compuesta."
           />
@@ -218,6 +229,7 @@ export function InputsPanel({ inputs, updateInput, onHover }: InputsPanelProps) 
             onChange={(v) => updateInput("tasaRetornoReservaAnual", v)}
             onMouseEnter={() => onHover?.("tasaRetornoReservaAnual")}
             onMouseLeave={() => onHover?.(null)}
+            onAdjustingChange={onAdjustingChange}
             suffix="%"
             tooltip="Rentabilidad anual esperada de tus activos de inversión, capitalizada mensualmente."
           />
@@ -230,6 +242,7 @@ export function InputsPanel({ inputs, updateInput, onHover }: InputsPanelProps) 
             onChange={(v) => updateInput("inflacionAnual", v)}
             onMouseEnter={() => onHover?.("inflacionAnual")}
             onMouseLeave={() => onHover?.(null)}
+            onAdjustingChange={onAdjustingChange}
             suffix="%"
             tooltip="Ajuste de precios anual. Se aplica de forma compuesta para proyectar el poder adquisitivo real."
           />
@@ -254,6 +267,7 @@ export function InputsPanel({ inputs, updateInput, onHover }: InputsPanelProps) 
             onChange={(v) => updateInput("margenSeguridad", v)}
             onMouseEnter={() => onHover?.("margenSeguridad")}
             onMouseLeave={() => onHover?.(null)}
+            onAdjustingChange={onAdjustingChange}
             suffix="%"
             tooltip="Factor de estrés que reduce los retornos y aumenta la inflación en la línea de seguridad (mínima) del gráfico."
           />

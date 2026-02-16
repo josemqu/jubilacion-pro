@@ -17,6 +17,7 @@ interface SliderInputProps {
   tooltip?: string;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
+  onAdjustingChange?: (adjusting: boolean) => void;
 }
 
 export function SliderInput({
@@ -30,7 +31,8 @@ export function SliderInput({
   suffix = "",
   tooltip,
   onMouseEnter,
-  onMouseLeave
+  onMouseLeave,
+  onAdjustingChange
 }: SliderInputProps) {
   const displayValue = format ? format(value) : `${value}${suffix}`;
 
@@ -85,6 +87,8 @@ export function SliderInput({
         min={min}
         step={step}
         onValueChange={(vals) => onChange(vals[0])}
+        onPointerDown={() => onAdjustingChange?.(true)}
+        onPointerUp={() => onAdjustingChange?.(false)}
       >
         <Slider.Track className="bg-slate-700 relative grow h-[4px] rounded-full">
           <Slider.Range className="absolute bg-blue-500 h-full rounded-full" />

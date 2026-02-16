@@ -59,10 +59,11 @@ export default function Home() {
   });
 
   const [hoveredInput, setHoveredInput] = useState<keyof CalculatorInputs | null>(null);
+  const [isAdjusting, setIsAdjusting] = useState(false);
 
   // Generate preview scenarios based on the hovered input in the sidebar
   const previewScenarios = useMemo(() => {
-    if (!hoveredInput || hoveredInput === 'margenSeguridad') return undefined;
+    if (!hoveredInput || hoveredInput === 'margenSeguridad' || isAdjusting) return undefined;
 
     const variations = [-2, -1, 1, 2];
     const key = hoveredInput as string;
@@ -396,6 +397,7 @@ export default function Home() {
                 inputs={inputs} 
                 updateInput={updateInput} 
                 onHover={setHoveredInput}
+                onAdjustingChange={setIsAdjusting}
               />
             </div>
           </div>
