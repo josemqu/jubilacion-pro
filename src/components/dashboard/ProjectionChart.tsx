@@ -247,16 +247,6 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
             {/* Individual Curves */}
             <Line
               type="monotone"
-              dataKey="capitalReserva"
-              name="Reserva"
-              stroke="#3b82f6"
-              strokeWidth={3}
-              dot={false}
-              activeDot={{ r: 5, strokeWidth: 0 }}
-              isAnimationActive={false}
-            />
-            <Line
-              type="monotone"
               dataKey="capitalCaja"
               name="Caja"
               stroke="#10b981"
@@ -265,7 +255,30 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
               activeDot={{ r: 5, strokeWidth: 0 }}
               isAnimationActive={false}
             />
+            <Line
+              type="monotone"
+              dataKey="capitalReserva"
+              name="Reserva"
+              stroke="#3b82f6"
+              strokeWidth={3}
+              dot={false}
+              activeDot={{ r: 5, strokeWidth: 0 }}
+              isAnimationActive={false}
+            />
             
+            {/* Total Line (Expected/Maxima) */}
+            <Line
+              type="monotone"
+              dataKey="capitalTotal"
+              name="Total"
+              stroke="#f8fafc"
+              strokeWidth={2}
+              strokeDasharray="4 4"
+              dot={false}
+              activeDot={{ r: 4, fill: '#f8fafc', stroke: '#0f172a', strokeWidth: 2 }}
+              isAnimationActive={false}
+            />
+
             {/* Stressed Total Line (Minima) */}
             {showStressedLine && (
               <Line
@@ -281,7 +294,7 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
               />
             )}
 
-            {/* Ghost Lines for Preview Scenarios */}
+            {/* Ghost Lines for Preview Scenarios (legendType="none") */}
             {previewScenarios?.map((scenario, idx) => {
               const isStressed = scenario.dataKey === 'capitalTotalStressed';
               const strokeColor = isStressed ? "#fbbf24" : "#ffffffff";
@@ -328,19 +341,6 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
                 </Line>
               );
             })}
-  
-            {/* Total Line (Expected/Maxima) */}
-            <Line
-              type="monotone"
-              dataKey="capitalTotal"
-              name="Máximo (Esperado)"
-              stroke="#f8fafc"
-              strokeWidth={2}
-              strokeDasharray="4 4"
-              dot={false}
-              activeDot={{ r: 4, fill: '#f8fafc', stroke: '#0f172a', strokeWidth: 2 }}
-              isAnimationActive={false}
-            />
 
           {/* Vertical Divider - Start of Retirement */}
           {retirementIndex !== null && (
