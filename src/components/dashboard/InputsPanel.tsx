@@ -175,7 +175,7 @@ export function InputsPanel({ inputs, updateInput, onHover, onAdjustingChange }:
             label="Capital de Caja"
             value={inputs.capitalInicialCaja}
             min={0}
-            max={1000000}
+            max={500000}
             step={5000}
             onChange={(v) => updateInput("capitalInicialCaja", v)}
             onMouseEnter={() => onHover?.("capitalInicialCaja")}
@@ -188,8 +188,8 @@ export function InputsPanel({ inputs, updateInput, onHover, onAdjustingChange }:
             label="Reserva Actual"
             value={inputs.capitalInicialReserva}
             min={0}
-            max={1000000}
-            step={100}
+            max={100000}
+            step={1000}
             onChange={(v) => updateInput("capitalInicialReserva", v)}
             onMouseEnter={() => onHover?.("capitalInicialReserva")}
             onMouseLeave={() => onHover?.(null)}
