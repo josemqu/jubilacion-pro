@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { YearData } from "@/lib/types";
 import { 
   Area, 
@@ -81,6 +81,19 @@ const CustomTooltip = React.memo(({ active, payload, label, showStressedLine }: 
 CustomTooltip.displayName = "CustomTooltip";
 
 export const ProjectionChart = React.memo(({ data, retirementAge, previewScenarios, showStressedLine = true }: ProjectionChartProps) => {
+  const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set());
+
+  const handleLegendClick = (o: any) => {
+    const { dataKey } = o;
+    const newHidden = new Set(hiddenSeries);
+    if (newHidden.has(dataKey)) {
+      newHidden.delete(dataKey);
+    } else {
+      newHidden.add(dataKey);
+    }
+    setHiddenSeries(newHidden);
+  };
+
   const formatCurrency = (value: number) => 
     `$${(value / 1000).toFixed(0)}k`;
 
@@ -203,6 +216,7 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
             align="right" 
             height={40} 
             iconType="circle"
+            onClick={handleLegendClick}
             wrapperStyle={{ 
               top: 8, 
               right: 0,
@@ -210,7 +224,8 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
               color: '#94a3b8', 
               textTransform: 'uppercase', 
               letterSpacing: '0.1em',
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              cursor: 'pointer'
             }}
           />
             
@@ -233,6 +248,7 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
               fill="url(#colorCaja)"
               legendType="none"
               isAnimationActive={false}
+              hide={hiddenSeries.has("capitalCaja")}
             />
             <Area
               type="monotone"
@@ -242,6 +258,7 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
               fill="url(#colorReserva)"
               legendType="none"
               isAnimationActive={false}
+              hide={hiddenSeries.has("capitalReserva")}
             />
   
             {/* Individual Curves - This order defines the Legend order */}
@@ -254,6 +271,7 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
               dot={false}
               activeDot={{ r: 5, strokeWidth: 0 }}
               isAnimationActive={false}
+              hide={hiddenSeries.has("capitalCaja")}
             />
             <Line
               type="monotone"
@@ -264,6 +282,7 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
               dot={false}
               activeDot={{ r: 5, strokeWidth: 0 }}
               isAnimationActive={false}
+              hide={hiddenSeries.has("capitalReserva")}
             />
             <Line
               type="monotone"
@@ -275,6 +294,7 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
               dot={false}
               activeDot={{ r: 4, fill: '#f8fafc', stroke: '#0f172a', strokeWidth: 2 }}
               isAnimationActive={false}
+              hide={hiddenSeries.has("capitalTotal")}
             />
             {showStressedLine && (
               <Line
@@ -287,6 +307,7 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
                 dot={false}
                 activeDot={{ r: 3, fill: '#fbbf24', stroke: '#0f172a', strokeWidth: 1 }}
                 isAnimationActive={false}
+                hide={hiddenSeries.has("capitalTotalStressed")}
               />
             )}
 
