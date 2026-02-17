@@ -224,16 +224,7 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
               />
             )}
   
-            {/* Background Areas (Stacked) */}
-            <Area
-              type="monotone"
-              dataKey="capitalReserva"
-              stackId="1"
-              stroke="none"
-              fill="url(#colorReserva)"
-              legendType="none"
-              isAnimationActive={false}
-            />
+            {/* Background Areas (Stacked) - legendType="none" to not interfere */}
             <Area
               type="monotone"
               dataKey="capitalCaja"
@@ -243,8 +234,17 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
               legendType="none"
               isAnimationActive={false}
             />
+            <Area
+              type="monotone"
+              dataKey="capitalReserva"
+              stackId="1"
+              stroke="none"
+              fill="url(#colorReserva)"
+              legendType="none"
+              isAnimationActive={false}
+            />
   
-            {/* Individual Curves */}
+            {/* Individual Curves - This order defines the Legend order */}
             <Line
               type="monotone"
               dataKey="capitalCaja"
@@ -265,8 +265,6 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
               activeDot={{ r: 5, strokeWidth: 0 }}
               isAnimationActive={false}
             />
-            
-            {/* Total Line (Expected/Maxima) */}
             <Line
               type="monotone"
               dataKey="capitalTotal"
@@ -278,8 +276,6 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
               activeDot={{ r: 4, fill: '#f8fafc', stroke: '#0f172a', strokeWidth: 2 }}
               isAnimationActive={false}
             />
-
-            {/* Stressed Total Line (Minima) */}
             {showStressedLine && (
               <Line
                 type="monotone"
@@ -319,7 +315,6 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
                     position="top"
                     content={(props: any) => {
                       const { x, y, index } = props;
-                      // Use scenario.data from outer scope to avoid props.data being undefined
                       if (index === Math.floor(scenario.data.length * 0.75)) {
                         return (
                           <text
