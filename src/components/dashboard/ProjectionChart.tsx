@@ -27,7 +27,7 @@ interface ProjectionChartProps {
   showStressedLine?: boolean;
 }
 
-const CustomTooltip = React.memo(({ active, payload, label }: any) => {
+const CustomTooltip = React.memo(({ active, payload, label, showStressedLine }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload as YearData;
     const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
@@ -59,9 +59,9 @@ const CustomTooltip = React.memo(({ active, payload, label }: any) => {
               <span className="text-slate-200 text-[10px] font-bold uppercase tracking-tight">Total Esperado</span>
               <span className="text-white font-mono text-sm font-black">${Math.round(data.capitalTotal).toLocaleString('de-DE')}</span>
             </div>
-            {data.capitalTotalStressed !== undefined && (
+            {showStressedLine && data.capitalTotalStressed !== undefined && (
               <div className="flex justify-between items-center opacity-80">
-                <span className="text-amber-400/80 text-[10px] font-bold uppercase tracking-tight">Escenario Conservador</span>
+                <span className="text-amber-400/80 text-[10px] font-bold uppercase tracking-tight">Conservador</span>
                 <span className="text-amber-400 font-mono text-xs font-bold">${Math.round(data.capitalTotalStressed).toLocaleString('de-DE')}</span>
               </div>
             )}
@@ -193,7 +193,7 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
           />
           
           <Tooltip 
-            content={<CustomTooltip />} 
+            content={<CustomTooltip showStressedLine={showStressedLine} />} 
             cursor={{ stroke: '#334155', strokeWidth: 1 }}
             isAnimationActive={false}
           />
@@ -271,7 +271,7 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
               <Line
                 type="monotone"
                 dataKey="capitalTotalStressed"
-                name="Mínimo (Stressed)"
+                name="Conservador"
                 stroke="#fbbf24"
                 strokeWidth={2}
                 strokeDasharray="4 4"
