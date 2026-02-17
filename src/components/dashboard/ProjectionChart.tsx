@@ -24,6 +24,7 @@ interface ProjectionChartProps {
     label: string;
     dataKey?: string;
   }[];
+  showStressedLine?: boolean;
 }
 
 const CustomTooltip = React.memo(({ active, payload, label }: any) => {
@@ -79,7 +80,7 @@ const CustomTooltip = React.memo(({ active, payload, label }: any) => {
 
 CustomTooltip.displayName = "CustomTooltip";
 
-export const ProjectionChart = React.memo(({ data, retirementAge, previewScenarios }: ProjectionChartProps) => {
+export const ProjectionChart = React.memo(({ data, retirementAge, previewScenarios, showStressedLine = true }: ProjectionChartProps) => {
   const formatCurrency = (value: number) => 
     `$${(value / 1000).toFixed(0)}k`;
 
@@ -266,17 +267,19 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
             />
             
             {/* Stressed Total Line (Minima) */}
-            <Line
-              type="monotone"
-              dataKey="capitalTotalStressed"
-              name="Mínimo (Stressed)"
-              stroke="#fbbf24"
-              strokeWidth={2}
-              strokeDasharray="4 4"
-              dot={false}
-              activeDot={{ r: 3, fill: '#fbbf24', stroke: '#0f172a', strokeWidth: 1 }}
-              isAnimationActive={false}
-            />
+            {showStressedLine && (
+              <Line
+                type="monotone"
+                dataKey="capitalTotalStressed"
+                name="Mínimo (Stressed)"
+                stroke="#fbbf24"
+                strokeWidth={2}
+                strokeDasharray="4 4"
+                dot={false}
+                activeDot={{ r: 3, fill: '#fbbf24', stroke: '#0f172a', strokeWidth: 1 }}
+                isAnimationActive={false}
+              />
+            )}
 
             {/* Ghost Lines for Preview Scenarios */}
             {previewScenarios?.map((scenario, idx) => {

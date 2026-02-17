@@ -16,4 +16,5 @@ export const DEFAULT_INPUTS: CalculatorInputs = {
   mesInicio: new Date().getMonth(),
   anoInicio: new Date().getFullYear(),
   margenSeguridad: 15,
+  verMargenSeguridad: true,
 };

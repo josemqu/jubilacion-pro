@@ -36,7 +36,7 @@ export function useCalculator() {
     return calc.runFullSimulation();
   }, [inputs]);
 
-  const updateInput = (key: keyof CalculatorInputs, value: number) => {
+  const updateInput = (key: keyof CalculatorInputs, value: number | boolean) => {
     setInputs((prev) => ({ ...prev, [key]: value }));
   };
 

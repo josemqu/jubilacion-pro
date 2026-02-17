@@ -4,12 +4,12 @@ import { SliderInput } from "../ui/slider-input";
 import { MonthYearPicker } from "../ui/month-year-picker";
 import { CalculatorInputs } from "@/lib/types";
 import { motion } from "framer-motion";
-import { User, DollarSign, BarChart4, Target, Calendar, Info } from "lucide-react";
+import { User, DollarSign, BarChart4, Target, Calendar, Info, Eye, EyeOff } from "lucide-react";
 import * as Tooltip from "@radix-ui/react-tooltip";
 
 interface InputsPanelProps {
   inputs: CalculatorInputs;
-  updateInput: (key: keyof CalculatorInputs, value: number) => void;
+  updateInput: (key: keyof CalculatorInputs, value: number | boolean) => void;
   onHover?: (key: keyof CalculatorInputs | null) => void;
   onAdjustingChange?: (adjusting: boolean) => void;
 }
@@ -251,11 +251,20 @@ export function InputsPanel({ inputs, updateInput, onHover, onAdjustingChange }:
 
       {/* Riesgo y Seguridad */}
       <section className={sectionClasses}>
-        <div className={headerClasses}>
-          <div className="p-1.5 bg-blue-900/30 rounded-md text-blue-400">
-            <Target size={16} />
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-blue-900/30 rounded-md text-blue-400">
+              <Target size={16} />
+            </div>
+            <h3 className={titleClasses}>Seguridad del Plan</h3>
           </div>
-          <h3 className={titleClasses}>Seguridad del Plan</h3>
+          <button
+            onClick={() => updateInput("verMargenSeguridad", !inputs.verMargenSeguridad)}
+            className="p-1.5 text-slate-500 hover:text-blue-400 transition-colors bg-slate-800/50 rounded-md border border-slate-700/50 active:scale-95"
+            title={inputs.verMargenSeguridad ? "Ocultar margen" : "Mostrar margen"}
+          >
+            {inputs.verMargenSeguridad ? <Eye size={16} /> : <EyeOff size={16} />}
+          </button>
         </div>
         <div className="space-y-4">
           <SliderInput

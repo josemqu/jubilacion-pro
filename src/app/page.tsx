@@ -64,6 +64,9 @@ export default function Home() {
   // Generate preview scenarios based on the hovered input in the sidebar
   const previewScenarios = useMemo(() => {
     if (!hoveredInput || hoveredInput === 'esperanzaVida' || isAdjusting) return undefined;
+    
+    // Si estamos en el slider de margen de seguridad y el ojo está tachado, no mostrar nada
+    if (hoveredInput === 'margenSeguridad' && !inputs.verMargenSeguridad) return undefined;
 
     const variations = [-2, -1, 1, 2];
     const key = hoveredInput as string;
@@ -515,6 +518,7 @@ export default function Home() {
                       data={results.tablaMensual} 
                       retirementAge={inputs.edadJubilacion} 
                       previewScenarios={previewScenarios}
+                      showStressedLine={inputs.verMargenSeguridad}
                     />
                   </motion.div>
                 ) : (

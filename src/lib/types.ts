@@ -14,6 +14,7 @@ export interface CalculatorInputs {
   mesInicio: number;
   anoInicio: number;
   margenSeguridad: number;
+  verMargenSeguridad: boolean;
 }
 export interface YearData {
   mes?: number;
