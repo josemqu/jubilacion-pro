@@ -104,11 +104,19 @@ export class RetirementCalculator {
       const ingresoMesStressed = this.inputs.ingresoMensual * inflacionAcumuladaStressed;
       const gastoMesStressed = this.inputs.gastoMensual * inflacionAcumuladaStressed;
       
-      capitalCaja += ingresoMesAjustado - gastoMesAjustado;
-      capitalCajaStressed += ingresoMesStressed - gastoMesStressed;
-      
-      if (capitalCaja < 0) capitalCaja = 0;
-      if (capitalCajaStressed < 0) capitalCajaStressed = 0;
+      // Apply monthly flow (Standard)
+      capitalCaja += (ingresoMesAjustado - gastoMesAjustado);
+      if (capitalCaja < 0) {
+        capitalReserva = Math.max(0, capitalReserva + capitalCaja);
+        capitalCaja = 0;
+      }
+
+      // Apply monthly flow (Stressed)
+      capitalCajaStressed += (ingresoMesStressed - gastoMesStressed);
+      if (capitalCajaStressed < 0) {
+        capitalReservaStressed = Math.max(0, capitalReservaStressed + capitalCajaStressed);
+        capitalCajaStressed = 0;
+      }
       
       let aporteRealMensual = 0;
       if (capitalCaja >= this.inputs.aporteMensualJubilacion) {
