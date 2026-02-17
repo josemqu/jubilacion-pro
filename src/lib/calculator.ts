@@ -63,11 +63,11 @@ export class RetirementCalculator {
     datosAnuales.push(initialState);
     datosMensuales.push(initialState);
 
-    let capitalCajaInicioAno = capitalCaja;
-    let capitalReservaInicioAno = capitalReserva;
     let ingresosTrabajoAno = 0;
     let gastosAno = 0;
     let aportesAno = 0;
+    let rendCajaAnoAcc = 0;
+    let rendReservaAnoAcc = 0;
     
     let currentMonth = this.inputs.mesInicio;
     let currentYear = this.inputs.anoInicio;
@@ -151,11 +151,13 @@ export class RetirementCalculator {
       ingresosTrabajoAno += ingresoMesAjustado;
       gastosAno += gastoMesAjustado;
       aportesAno += aporteRealMensual;
+      rendCajaAnoAcc += rendCajaMes;
+      rendReservaAnoAcc += rendReservaMes;
 
       if (currentMonth === 5) currentEdad++;
       if (currentMonth === 11 || mesIdx === totalMeses) {
-        const rendCajaAno = capitalCaja - capitalCajaInicioAno - ingresosTrabajoAno + gastosAno + aportesAno;
-        const rendReservaAno = capitalReserva - capitalReservaInicioAno - aportesAno;
+        const rendCajaAno = rendCajaAnoAcc;
+        const rendReservaAno = rendReservaAnoAcc;
         
         datosAnuales.push({
           mes: currentMonth,
@@ -176,11 +178,11 @@ export class RetirementCalculator {
           referenciaInflacion: Math.round(inflacionAcumulada * 1000) / 1000
         });
 
-        capitalCajaInicioAno = capitalCaja;
-        capitalReservaInicioAno = capitalReserva;
         ingresosTrabajoAno = 0;
         gastosAno = 0;
         aportesAno = 0;
+        rendCajaAnoAcc = 0;
+        rendReservaAnoAcc = 0;
         currentMonth = 0;
         currentYear++;
       } else {
