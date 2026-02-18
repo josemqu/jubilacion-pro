@@ -16,7 +16,7 @@ export function useCalculator() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        setInputs(JSON.parse(saved));
+        setInputs({ ...DEFAULT_INPUTS, ...JSON.parse(saved) });
       } catch (e) {
         console.error("Error loading saved data", e);
       }

@@ -78,7 +78,7 @@ export class RetirementCalculator {
     let totalMeses = 0;
     while (tempEdad < this.inputs.edadJubilacion) {
       totalMeses++;
-      if (tempMonth === 5) tempEdad++; // Birthday in June (index 5)
+      if (tempMonth === this.inputs.mesCumpleanos) tempEdad++; // Birthday
       tempMonth = (tempMonth + 1) % 12;
     }
 
@@ -154,7 +154,7 @@ export class RetirementCalculator {
       rendCajaAnoAcc += rendCajaMes;
       rendReservaAnoAcc += rendReservaMes;
 
-      if (currentMonth === 5) currentEdad++;
+      if (currentMonth === this.inputs.mesCumpleanos) currentEdad++;
       if (currentMonth === 11 || mesIdx === totalMeses) {
         const rendCajaAno = rendCajaAnoAcc;
         const rendReservaAno = rendReservaAnoAcc;
@@ -300,7 +300,7 @@ export class RetirementCalculator {
         referenciaInflacion: Math.round(inflacionAcumulada * 1000) / 1000
       });
 
-      if (currentMonth === 5) currentEdad++;
+      if (currentMonth === this.inputs.mesCumpleanos) currentEdad++;
       if (currentMonth === 11 || mesIdx === mesesRetiro) {
         datosAnuales.push({
           mes: currentMonth,

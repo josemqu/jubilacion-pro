@@ -13,6 +13,7 @@ export interface CalculatorInputs {
   gastoMensualDeseado: number;
   mesInicio: number;
   anoInicio: number;
+  mesCumpleanos: number;
   margenSeguridad: number;
   verMargenSeguridad: boolean;
 }

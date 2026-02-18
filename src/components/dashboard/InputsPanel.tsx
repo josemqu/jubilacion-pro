@@ -14,6 +14,11 @@ interface InputsPanelProps {
   onAdjustingChange?: (adjusting: boolean) => void;
 }
 
+const MONTHS = [
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+];
+
 export function InputsPanel({ inputs, updateInput, onHover, onAdjustingChange }: InputsPanelProps) {
   const sectionClasses = "bg-slate-900/50 border border-slate-800/50 p-6 rounded-2xl space-y-6";
   const headerClasses = "flex items-center gap-2 mb-2";
@@ -62,6 +67,46 @@ export function InputsPanel({ inputs, updateInput, onHover, onAdjustingChange }:
                 updateInput("anoInicio", y);
               }}
             />
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-center gap-1.5">
+              <label className="text-sm font-medium text-slate-300">Mes de Cumpleaños</label>
+              <Tooltip.Provider delayDuration={200}>
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
+                    <button className="text-blue-500/70 hover:text-blue-400 transition-all duration-300 hover:scale-110 active:scale-95 flex items-center">
+                      <Info size={16} strokeWidth={2} />
+                    </button>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content
+                      className="z-[100] bg-slate-900 text-slate-200 p-3 rounded-xl text-xs max-w-[240px] shadow-2xl border border-slate-800 leading-relaxed select-none animate-in fade-in zoom-in-95 duration-200"
+                      sideOffset={8}
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <Info size={14} className="text-blue-500 shrink-0 mt-0.5" />
+                        <span>Se considera que cumples años el último día de este mes.</span>
+                      </div>
+                      <Tooltip.Arrow className="fill-slate-900" />
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
+              </Tooltip.Provider>
+            </div>
+            <div className="relative group">
+              <select
+                value={inputs.mesCumpleanos}
+                onChange={(e) => updateInput("mesCumpleanos", parseInt(e.target.value))}
+                className="w-full h-11 rounded-xl border border-slate-800 bg-slate-900/50 px-4 text-sm text-slate-200 outline-none focus:ring-2 focus:ring-blue-500/50 hover:bg-slate-800/80 hover:border-slate-700 transition-all cursor-pointer appearance-none"
+              >
+                {MONTHS.map((m, i) => (
+                  <option key={i} value={i} className="bg-slate-900 text-slate-200">{m}</option>
+                ))}
+              </select>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 group-hover:text-blue-500 transition-colors">
+                <Calendar size={14} />
+              </div>
+            </div>
           </div>
           <SliderInput
             label="Edad Actual"

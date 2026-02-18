@@ -15,6 +15,7 @@ export const DEFAULT_INPUTS: CalculatorInputs = {
   gastoMensualDeseado: 2500,
   mesInicio: new Date().getMonth(),
   anoInicio: new Date().getFullYear(),
+  mesCumpleanos: 5, // Junio
   margenSeguridad: 15,
   verMargenSeguridad: true,
 };
