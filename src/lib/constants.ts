@@ -11,6 +11,8 @@ export const DEFAULT_INPUTS: CalculatorInputs = {
   aporteMensualJubilacion: 100,
   tasaRetornoCajaAnual: 4,
   tasaRetornoReservaAnual: 7,
+  periodoRetornoCaja: 'annual',
+  periodoRetornoReserva: 'annual',
   inflacionAnual: 3,
   gastoMensualDeseado: 2500,
   mesInicio: new Date().getMonth(),

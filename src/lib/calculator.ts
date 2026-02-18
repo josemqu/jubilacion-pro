@@ -1,4 +1,4 @@
-import { CalculatorInputs, AccumulationResult, RetirementResult, YearData, FullSimulationResult } from './types';
+import { CalculatorInputs, AccumulationResult, RetirementResult, YearData, FullSimulationResult, ReturnPeriod } from './types';
 
 export class RetirementCalculator {
   private inputs: CalculatorInputs;
@@ -12,18 +12,30 @@ export class RetirementCalculator {
   private tasaMensualReservaStressed: number;
   private tasaMensualInflacionStressed: number;
 
+  private getMonthlyRate(rate: number, period: ReturnPeriod): number {
+    const daysInPeriod = {
+      annual: 365,
+      monthly: 365 / 12,
+      weekly: 7,
+      daily: 1
+    }[period];
+    
+    // Effective Monthly Rate: (1 + r_period)^((365/12)/days_in_period) - 1
+    return Math.pow(1 + rate / 100, (365 / 12) / daysInPeriod) - 1;
+  }
+
   constructor(inputs: CalculatorInputs) {
     this.inputs = inputs;
     const marginFactor = inputs.margenSeguridad / 100;
 
-    // Compound Monthly Rates: (1 + i_annual)^(1/12) - 1
-    this.tasaMensualCaja = Math.pow(1 + inputs.tasaRetornoCajaAnual / 100, 1 / 12) - 1;
-    this.tasaMensualReserva = Math.pow(1 + inputs.tasaRetornoReservaAnual / 100, 1 / 12) - 1;
+    // Compound Monthly Rates
+    this.tasaMensualCaja = this.getMonthlyRate(inputs.tasaRetornoCajaAnual, inputs.periodoRetornoCaja);
+    this.tasaMensualReserva = this.getMonthlyRate(inputs.tasaRetornoReservaAnual, inputs.periodoRetornoReserva);
     this.tasaMensualInflacion = Math.pow(1 + inputs.inflacionAnual / 100, 1 / 12) - 1;
 
     // Stressed scenario: lower returns, higher inflation
-    this.tasaMensualCajaStressed = Math.pow(1 + (inputs.tasaRetornoCajaAnual * (1 - marginFactor)) / 100, 1 / 12) - 1;
-    this.tasaMensualReservaStressed = Math.pow(1 + (inputs.tasaRetornoReservaAnual * (1 - marginFactor)) / 100, 1 / 12) - 1;
+    this.tasaMensualCajaStressed = this.getMonthlyRate(inputs.tasaRetornoCajaAnual * (1 - marginFactor), inputs.periodoRetornoCaja);
+    this.tasaMensualReservaStressed = this.getMonthlyRate(inputs.tasaRetornoReservaAnual * (1 - marginFactor), inputs.periodoRetornoReserva);
     this.tasaMensualInflacionStressed = Math.pow(1 + (inputs.inflacionAnual * (1 + marginFactor)) / 100, 1 / 12) - 1;
   }
 

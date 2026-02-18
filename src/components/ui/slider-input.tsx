@@ -4,6 +4,7 @@ import * as Slider from "@radix-ui/react-slider";
 import { Label } from "@radix-ui/react-label";
 import { Info } from "lucide-react";
 import * as Tooltip from "@radix-ui/react-tooltip";
+import { useState, useEffect, useRef } from "react";
 
 interface SliderInputProps {
   label: string;
@@ -34,7 +35,42 @@ export function SliderInput({
   onMouseLeave,
   onAdjustingChange
 }: SliderInputProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [inputValue, setInputValue] = useState(value.toString());
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!isEditing) {
+      setInputValue(value.toString());
+    }
+  }, [value, isEditing]);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
   const displayValue = format ? format(value) : `${value}${suffix}`;
+
+  const handleBlur = () => {
+    setIsEditing(false);
+    const num = parseFloat(inputValue.replace(',', '.'));
+    if (!isNaN(num)) {
+      const clamped = Math.max(min, Math.min(max, num));
+      onChange(clamped);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleBlur();
+    } else if (e.key === "Escape") {
+      setIsEditing(false);
+      setInputValue(value.toString());
+    }
+  };
 
   return (
     <div 
@@ -44,7 +80,7 @@ export function SliderInput({
     >
       {/* Subtle highlight indicator */}
       <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 bg-gradient-to-r from-blue-500/5 to-transparent transition-opacity duration-500 pointer-events-none" />
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center relative z-10">
         <div className="flex items-center gap-1.5">
           <Label className="text-sm font-medium text-slate-300">
             {label}
@@ -75,9 +111,25 @@ export function SliderInput({
             </Tooltip.Provider>
           )}
         </div>
-        <span className="text-sm font-mono font-bold text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded transition-all duration-300 group-hover:bg-blue-500/20 group-hover:text-blue-300 group-hover:scale-105">
-          {displayValue}
-        </span>
+        
+        {isEditing ? (
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            className="w-20 text-right text-sm font-mono font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded border border-blue-500/50 outline-none focus:ring-2 focus:ring-blue-500/50"
+          />
+        ) : (
+          <button 
+            onClick={() => setIsEditing(true)}
+            className="text-sm font-mono font-bold text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded transition-all duration-300 hover:bg-blue-500/20 hover:text-blue-300 hover:scale-105 cursor-pointer select-none"
+          >
+            {displayValue}
+          </button>
+        )}
       </div>
       
       <Slider.Root
@@ -101,3 +153,4 @@ export function SliderInput({
     </div>
   );
 }
+

@@ -9,7 +9,7 @@ import * as Tooltip from "@radix-ui/react-tooltip";
 
 interface InputsPanelProps {
   inputs: CalculatorInputs;
-  updateInput: (key: keyof CalculatorInputs, value: number | boolean) => void;
+  updateInput: (key: keyof CalculatorInputs, value: number | boolean | string) => void;
   onHover?: (key: keyof CalculatorInputs | null) => void;
   onAdjustingChange?: (adjusting: boolean) => void;
 }
@@ -18,6 +18,13 @@ const MONTHS = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
   "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
 ];
+
+const RETURN_PERIODS = [
+  { id: 'annual', label: 'Anual' },
+  { id: 'monthly', label: 'Mensual' },
+  { id: 'weekly', label: 'Semanal' },
+  { id: 'daily', label: 'Diario' },
+] as const;
 
 export function InputsPanel({ inputs, updateInput, onHover, onAdjustingChange }: InputsPanelProps) {
   const sectionClasses = "bg-slate-900/50 border border-slate-800/50 p-6 rounded-2xl space-y-6";
@@ -251,35 +258,79 @@ export function InputsPanel({ inputs, updateInput, onHover, onAdjustingChange }:
           <div className={iconClasses}><Target size={16} /></div>
           <h3 className={titleClasses}>Economía (%)</h3>
         </div>
-        <div className="space-y-4">
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <SliderInput
+              label="Rendimiento Caja"
+              value={inputs.tasaRetornoCajaAnual}
+              min={0}
+              max={
+                inputs.periodoRetornoCaja === 'daily' ? 1 : 
+                inputs.periodoRetornoCaja === 'weekly' ? 5 : 
+                inputs.periodoRetornoCaja === 'monthly' ? 15 : 50
+              }
+              step={inputs.periodoRetornoCaja === 'daily' ? 0.01 : 0.1}
+              onChange={(v) => updateInput("tasaRetornoCajaAnual", v)}
+              onMouseEnter={() => onHover?.("tasaRetornoCajaAnual")}
+              onMouseLeave={() => onHover?.(null)}
+              onAdjustingChange={onAdjustingChange}
+              suffix="%"
+              tooltip={`Rendimiento esperado de tu capital en caja (${inputs.periodoRetornoCaja === 'annual' ? 'efectivo anual' : 'por periodo'}).`}
+            />
+            <div className="flex gap-1 px-3">
+              {RETURN_PERIODS.map((period) => (
+                <button
+                  key={period.id}
+                  onClick={() => updateInput("periodoRetornoCaja", period.id)}
+                  className={`px-2 py-1 rounded-md text-[10px] uppercase tracking-wider font-bold transition-all ${
+                    inputs.periodoRetornoCaja === period.id
+                      ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                      : "bg-slate-800/40 text-slate-500 border border-transparent hover:bg-slate-800/60"
+                  }`}
+                >
+                  {period.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <SliderInput
+              label="Rendimiento Reserva"
+              value={inputs.tasaRetornoReservaAnual}
+              min={0}
+              max={
+                inputs.periodoRetornoReserva === 'daily' ? 1 : 
+                inputs.periodoRetornoReserva === 'weekly' ? 5 : 
+                inputs.periodoRetornoReserva === 'monthly' ? 15 : 50
+              }
+              step={inputs.periodoRetornoReserva === 'daily' ? 0.01 : 0.1}
+              onChange={(v) => updateInput("tasaRetornoReservaAnual", v)}
+              onMouseEnter={() => onHover?.("tasaRetornoReservaAnual")}
+              onMouseLeave={() => onHover?.(null)}
+              onAdjustingChange={onAdjustingChange}
+              suffix="%"
+              tooltip={`Rentabilidad esperada de tus activos de inversión (${inputs.periodoRetornoReserva === 'annual' ? 'efectivo anual' : 'por periodo'}).`}
+            />
+            <div className="flex gap-1 px-3">
+              {RETURN_PERIODS.map((period) => (
+                <button
+                  key={period.id}
+                  onClick={() => updateInput("periodoRetornoReserva", period.id)}
+                  className={`px-2 py-1 rounded-md text-[10px] uppercase tracking-wider font-bold transition-all ${
+                    inputs.periodoRetornoReserva === period.id
+                      ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                      : "bg-slate-800/40 text-slate-500 border border-transparent hover:bg-slate-800/60"
+                  }`}
+                >
+                  {period.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <SliderInput
-            label="TNA Caja"
-            value={inputs.tasaRetornoCajaAnual}
-            min={0}
-            max={20}
-            step={0.1}
-            onChange={(v) => updateInput("tasaRetornoCajaAnual", v)}
-            onMouseEnter={() => onHover?.("tasaRetornoCajaAnual")}
-            onMouseLeave={() => onHover?.(null)}
-            onAdjustingChange={onAdjustingChange}
-            suffix="%"
-            tooltip="Tasa Nominal Anual estimada. Calculada como tasa efectiva mensual compuesta."
-          />
-          <SliderInput
-            label="TNA Reserva"
-            value={inputs.tasaRetornoReservaAnual}
-            min={0}
-            max={20}
-            step={0.1}
-            onChange={(v) => updateInput("tasaRetornoReservaAnual", v)}
-            onMouseEnter={() => onHover?.("tasaRetornoReservaAnual")}
-            onMouseLeave={() => onHover?.(null)}
-            onAdjustingChange={onAdjustingChange}
-            suffix="%"
-            tooltip="Rentabilidad anual esperada de tus activos de inversión, capitalizada mensualmente."
-          />
-          <SliderInput
-            label="Inflación"
+            label="Inflación (Anual)"
             value={inputs.inflacionAnual}
             min={0}
             max={20}

@@ -1,3 +1,5 @@
+export type ReturnPeriod = 'annual' | 'monthly' | 'weekly' | 'daily';
+
 export interface CalculatorInputs {
   edadActual: number;
   edadJubilacion: number;
@@ -9,6 +11,8 @@ export interface CalculatorInputs {
   aporteMensualJubilacion: number;
   tasaRetornoCajaAnual: number;
   tasaRetornoReservaAnual: number;
+  periodoRetornoCaja: ReturnPeriod;
+  periodoRetornoReserva: ReturnPeriod;
   inflacionAnual: number;
   gastoMensualDeseado: number;
   mesInicio: number;
