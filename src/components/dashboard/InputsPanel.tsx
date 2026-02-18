@@ -369,7 +369,10 @@ export function InputsPanel({ inputs, updateInput, onHover, onAdjustingChange }:
             min={0}
             max={50}
             step={1}
-            onChange={(v) => updateInput("margenSeguridad", v)}
+            onChange={(v) => {
+              updateInput("margenSeguridad", v);
+              if (!inputs.verMargenSeguridad) updateInput("verMargenSeguridad", true);
+            }}
             onMouseEnter={() => onHover?.("margenSeguridad")}
             onMouseLeave={() => onHover?.(null)}
             onAdjustingChange={onAdjustingChange}
