@@ -42,4 +42,4 @@ Este proyecto está optimizado para desplegarse en [Vercel](https://vercel.com).
 Si necesitas configurar el proyecto manualmente en Vercel, utiliza los valores definidos en `vercel.json`.
 
 ---
-© 2026 Jubilación Pro v2.0
+© 2026 Jubilación Pro

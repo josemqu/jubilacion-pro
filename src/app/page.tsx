@@ -314,9 +314,6 @@ export default function Home() {
                 <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
                   Jubilación Pro
                 </span>
-                <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 uppercase tracking-wider">
-                  v2.0
-                </span>
               </div>
             </div>
           </div>
@@ -681,7 +678,7 @@ export default function Home() {
             <footer className="pt-12 pb-6 border-t border-slate-900">
               <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-slate-600">
                 <p className="text-[10px] uppercase tracking-widest font-bold">
-                  © 2026 Jubilación Pro v2.0 • Simulación Estocástica de Activos
+                  © 2026 Jubilación Pro • Simulación Estocástica de Activos
                 </p>
                 <div className="flex gap-6">
                   <Link href="/terminos-y-condiciones" className="text-[9px] uppercase tracking-widest hover:text-blue-400 transition-colors">Términos y Condiciones</Link>

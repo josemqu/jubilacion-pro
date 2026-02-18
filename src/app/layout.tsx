@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://jubilacion-pro.vercel.app"),
-  title: "Jubilación Pro v2.0 | Simulador Avanzado de Retiro",
+  title: "Jubilación Pro | Simulador Avanzado de Retiro",
   description: "Planifica tu jubilación con precisión matemática. Calcula tu ahorro, interés compuesto, impacto de la inflación y sostenibilidad de tu capital hasta los 100 años.",
   keywords: ["jubilación", "retiro", "finanzas personales", "libertad financiera", "simulador financiero", "plan de ahorro", "interés compuesto", "inflación", "calculadora de retiro"],
   authors: [{ name: "Jubilación Pro Team" }],
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Jubilación Pro v2.0 | Planifica tu Futuro Financiero",
+    title: "Jubilación Pro | Planifica tu Futuro Financiero",
     description: "Calculadora de retiro avanzada con visualización de datos en tiempo real. ¿Cuándo podrás retirarte?",
     url: "https://jubilacion-pro.vercel.app",
     siteName: "Jubilación Pro",

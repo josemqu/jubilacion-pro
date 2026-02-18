@@ -103,7 +103,7 @@ export default function TerminosYCondiciones() {
               Entendido, volver al simulador
             </Link>
             <p className="text-[10px] text-slate-600 uppercase tracking-[0.2em]">
-              Jubilación Pro v2.0 • 2026
+              Jubilación Pro • 2026
             </p>
           </footer>
         </div>
