@@ -15,6 +15,7 @@ import confetti from "canvas-confetti";
 import { DEFAULT_INPUTS } from "@/lib/constants";
 import * as XLSX from "xlsx-js-style";
 import { FileSpreadsheet } from "lucide-react";
+import Link from "next/link";
 
 function NavButtonTooltip({ children, content }: { children: React.ReactNode; content: string }) {
   return (
@@ -617,6 +618,65 @@ export default function Home() {
               </div>
             </motion.div>
             
+            {/* SEO & Information Section */}
+            <section className="mt-16 space-y-12 border-t border-slate-900 pt-16">
+              <div className="grid md:grid-cols-2 gap-12">
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    <Info size={20} className="text-blue-500" />
+                    ¿Cómo funciona este simulador?
+                  </h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    Jubilación Pro utiliza algoritmos de proyección financiera para calcular la evolución de tu patrimonio a largo plazo. 
+                    A diferencia de calculadoras simples, nuestro sistema considera el <strong>interés compuesto</strong>, la 
+                    <strong> inflación proyectada</strong> y la distinción entre capital de caja (disponible) y reserva (inversión).
+                  </p>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    El simulador ajusta automáticamente todos los valores futuros a "dólares de hoy" para que puedas entender tu 
+                    poder adquisitivo real al momento del retiro.
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    <LineChart size={20} className="text-emerald-500" />
+                    Análisis de Libertad Financiera
+                  </h3>
+                  <ul className="space-y-3">
+                    <li className="flex gap-3 text-sm text-slate-400">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+                      <span><strong>Tasa de Retiro:</strong> Calculamos si tu patrimonio es capaz de sostener tus gastos mensuales sin agotarse.</span>
+                    </li>
+                    <li className="flex gap-3 text-sm text-slate-400">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+                      <span><strong>Margen de Seguridad:</strong> Evalúa tu plan bajo escenarios de estrés de mercado para asegurar tu futuro.</span>
+                    </li>
+                    <li className="flex gap-3 text-sm text-slate-400">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+                      <span><strong>Optimización Fiscal:</strong> Separa tus ahorros en diferentes tipos de activos para una mejor visualización.</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="bg-slate-900/30 border border-slate-800/50 rounded-3xl p-8">
+                <h3 className="text-lg font-bold text-white mb-6">Preguntas Frecuentes sobre el Retiro</h3>
+                <div className="grid md:grid-cols-3 gap-8">
+                  <div className="space-y-2">
+                    <h4 className="text-blue-400 text-sm font-bold">¿Qué es el interés compuesto?</h4>
+                    <p className="text-slate-500 text-[13px] leading-relaxed">Es el efecto de reinvertir los beneficios generados por tu capital, haciendo que tu dinero crezca de forma exponencial con el tiempo.</p>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="text-blue-400 text-sm font-bold">¿Por qué usar inflación?</h4>
+                    <p className="text-slate-500 text-[13px] leading-relaxed">La inflación reduce el poder de compra. Nuestro simulador descuenta la inflación para mostrarte cuánto valdrá tu dinero realmente en el futuro.</p>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="text-blue-400 text-sm font-bold">¿Es segura mi información?</h4>
+                    <p className="text-slate-500 text-[13px] leading-relaxed">Sí. Todos los cálculos se realizan localmente en tu navegador. Tus datos financieros nunca salen de tu dispositivo.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
             {/* Footer inside content area for consistency */}
             <footer className="pt-12 pb-6 border-t border-slate-900">
               <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-slate-600">
@@ -624,6 +684,7 @@ export default function Home() {
                   © 2026 Jubilación Pro v2.0 • Simulación Estocástica de Activos
                 </p>
                 <div className="flex gap-6">
+                  <Link href="/terminos-y-condiciones" className="text-[9px] uppercase tracking-widest hover:text-blue-400 transition-colors">Términos y Condiciones</Link>
                   <span className="text-[9px] uppercase tracking-widest hover:text-blue-400 cursor-help transition-colors">Seguridad AES-256</span>
                   <span className="text-[9px] uppercase tracking-widest hover:text-blue-400 cursor-help transition-colors">Cálculo en Local</span>
                 </div>

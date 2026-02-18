@@ -1,0 +1,17 @@
+{
+  "name": "Jubilación Pro v2.0",
+  "short_name": "Jubilación Pro",
+  "description": "Simulador avanzado de jubilación y libertad financiera.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
