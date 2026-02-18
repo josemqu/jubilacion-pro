@@ -667,8 +667,8 @@ export default function Home() {
                     <p className="text-slate-500 text-[13px] leading-relaxed">La inflación reduce el poder de compra. Nuestro simulador descuenta la inflación para mostrarte cuánto valdrá tu dinero realmente en el futuro.</p>
                   </div>
                   <div className="space-y-2">
-                    <h4 className="text-blue-400 text-sm font-bold">¿Es segura mi información?</h4>
-                    <p className="text-slate-500 text-[13px] leading-relaxed">Sí. Todos los cálculos se realizan localmente en tu navegador. Tus datos financieros nunca salen de tu dispositivo.</p>
+                    <h4 className="text-blue-400 text-sm font-bold">¿Qué es el margen de seguridad?</h4>
+                    <p className="text-slate-500 text-[13px] leading-relaxed">Es un parámetro que estresa el plan reduciendo la rentabilidad y aumentando la inflación para verificar si tu estrategia aguanta escenarios difíciles.</p>
                   </div>
                 </div>
               </div>
@@ -682,8 +682,6 @@ export default function Home() {
                 </p>
                 <div className="flex gap-6">
                   <Link href="/terminos-y-condiciones" className="text-[9px] uppercase tracking-widest hover:text-blue-400 transition-colors">Términos y Condiciones</Link>
-                  <span className="text-[9px] uppercase tracking-widest hover:text-blue-400 cursor-help transition-colors">Seguridad AES-256</span>
-                  <span className="text-[9px] uppercase tracking-widest hover:text-blue-400 cursor-help transition-colors">Cálculo en Local</span>
                 </div>
               </div>
             </footer>
