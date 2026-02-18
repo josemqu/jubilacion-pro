@@ -310,9 +310,12 @@ export default function Home() {
               <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center border border-slate-800 shadow-2xl" aria-hidden="true">
                 <img src="/icon.png" alt="Logo Jubilación Pro" className="w-full h-full object-cover" />
               </div>
-              <div className="hidden sm:block">
+              <div className="hidden sm:flex items-center">
                 <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
                   Jubilación Pro
+                </span>
+                <span className="hidden md:inline-block ml-4 pl-4 border-l border-slate-800 text-[10px] text-slate-500 font-medium max-w-[180px] leading-tight uppercase tracking-wider">
+                  Simulador avanzado de independencia financiera y retiro
                 </span>
               </div>
             </div>
