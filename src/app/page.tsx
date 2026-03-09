@@ -8,8 +8,8 @@ import { RetirementCalculator } from "@/lib/calculator";
 import { InputsPanel } from "@/components/dashboard/InputsPanel";
 import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calculator, Settings2, LineChart, LayoutDashboard, Share2, Download, Upload, RotateCcw, X, ChevronLeft, ChevronRight, Info } from "lucide-react";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { Calculator, Settings2, LineChart, LayoutDashboard, Share2, Download, Upload, RotateCcw, X, ChevronLeft, ChevronRight, Info, Menu, ChevronDown } from "lucide-react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import confetti from "canvas-confetti";
 import { DEFAULT_INPUTS } from "@/lib/constants";
@@ -43,6 +43,8 @@ export default function Home() {
   const { inputs, results, updateInput, importData, isLoaded } = useCalculator();
   const [activeTab, setActiveTab] = useState<"projection" | "details">("projection");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [modalConfig, setModalConfig] = useState<{
     isOpen: boolean;
     title: string;
@@ -296,18 +298,18 @@ export default function Home() {
   return (
     <div className="h-screen bg-[#020617] text-slate-200 font-sans selection:bg-blue-500/30 flex flex-col overflow-hidden">
       {/* Top Navigation Bar */}
-      <nav className="h-16 flex-shrink-0 z-50 border-b border-slate-800/50 bg-slate-950/40 backdrop-blur-md">
-        <div className="px-4 h-full flex justify-between items-center">
-          <div className="flex items-center gap-4">
+      <nav className="h-14 lg:h-16 flex-shrink-0 z-50 border-b border-slate-800/50 bg-slate-950/40 backdrop-blur-md">
+        <div className="px-3 lg:px-4 h-full flex justify-between items-center">
+          <div className="flex items-center gap-2 lg:gap-4">
             <button 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors lg:hidden"
+              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors hidden lg:block"
               aria-label={isSidebarOpen ? "Cerrar parámetros" : "Abrir parámetros"}
             >
               <Settings2 size={20} />
             </button>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center border border-slate-800 shadow-2xl" aria-hidden="true">
+            <div className="flex items-center gap-2 lg:gap-3">
+              <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-xl overflow-hidden flex items-center justify-center border border-slate-800 shadow-2xl" aria-hidden="true">
                 <img src="/icon.png" alt="Logo Jubilación Pro" className="w-full h-full object-cover" />
               </div>
               <div className="hidden sm:flex items-center">
@@ -321,9 +323,8 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-
-            
+          {/* Desktop nav buttons */}
+          <div className="hidden sm:flex items-center gap-2">
             <NavButtonTooltip content="Resetear plan">
               <button 
                 onClick={handleReset}
@@ -372,11 +373,66 @@ export default function Home() {
               </button>
             </NavButtonTooltip>
           </div>
+
+          {/* Mobile nav buttons — compact */}
+          <div className="flex sm:hidden items-center gap-1">
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleImport} 
+              accept=".json" 
+              className="hidden" 
+            />
+            <button 
+              onClick={handleExport}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white rounded-lg transition-all border border-blue-500 shadow-lg shadow-blue-900/20 active:scale-95"
+            >
+              <Upload size={14} />
+            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 text-slate-400 hover:text-white transition-colors"
+                aria-label="Menú"
+              >
+                <Menu size={20} />
+              </button>
+              <AnimatePresence>
+                {isMobileMenuOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -5 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-2 w-48 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl shadow-black/40 overflow-hidden z-[60]"
+                  >
+                    <button onClick={() => { handleReset(); setIsMobileMenuOpen(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 transition-colors">
+                      <RotateCcw size={16} className="text-rose-400" />
+                      Resetear Plan
+                    </button>
+                    <button onClick={() => { fileInputRef.current?.click(); setIsMobileMenuOpen(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 transition-colors border-t border-slate-800">
+                      <Download size={16} className="text-slate-400" />
+                      Importar JSON
+                    </button>
+                    <button onClick={() => { handleExcelExport(); setIsMobileMenuOpen(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 transition-colors border-t border-slate-800">
+                      <FileSpreadsheet size={16} className="text-emerald-400" />
+                      Exportar Excel
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
       </nav>
 
+      {/* Close mobile menu when clicking outside */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-[55] sm:hidden" onClick={() => setIsMobileMenuOpen(false)} />
+      )}
+
       <div className="flex flex-1 overflow-hidden relative">
-        {/* Sidebar - Parameters */}
+        {/* Sidebar - Parameters (Desktop only) */}
         <motion.aside 
           initial={false}
           animate={{ 
@@ -412,7 +468,7 @@ export default function Home() {
           </div>
         </motion.aside>
 
-        {/* Floating Toggle Button (visible when sidebar is closed) */}
+        {/* Floating Toggle Button - Desktop (visible when sidebar is closed) */}
         {!isSidebarOpen && (
           <motion.button
             initial={{ opacity: 0 }}
@@ -427,24 +483,91 @@ export default function Home() {
           </motion.button>
         )}
 
+        {/* Mobile FAB - Open Parameters Drawer */}
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3, type: "spring", stiffness: 300 }}
+          onClick={() => setIsMobileDrawerOpen(true)}
+          className="fixed right-4 bottom-5 z-40 p-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl shadow-2xl shadow-blue-600/40 active:scale-90 transition-transform lg:hidden flex items-center gap-2"
+          aria-label="Abrir parámetros"
+        >
+          <Settings2 size={22} />
+          <span className="text-[11px] font-bold uppercase tracking-wider">Ajustar</span>
+        </motion.button>
+
+        {/* Mobile Bottom Sheet Drawer */}
+        <AnimatePresence>
+          {isMobileDrawerOpen && (
+            <>
+              {/* Backdrop */}
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] lg:hidden"
+                onClick={() => setIsMobileDrawerOpen(false)}
+              />
+              {/* Drawer */}
+              <motion.div
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "spring", damping: 28, stiffness: 300 }}
+                className="fixed inset-x-0 bottom-0 z-[80] lg:hidden bg-[#0a0f1e] border-t border-slate-700/50 rounded-t-3xl shadow-2xl shadow-black/60"
+                style={{ maxHeight: '88vh' }}
+              >
+                {/* Drag Handle */}
+                <div className="flex justify-center pt-3 pb-1">
+                  <div className="w-10 h-1 rounded-full bg-slate-600" />
+                </div>
+                {/* Header */}
+                <div className="flex items-center justify-between px-5 pb-3 border-b border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-blue-500/20 rounded-lg">
+                      <Settings2 size={16} className="text-blue-400" />
+                    </div>
+                    <span className="text-sm font-bold uppercase tracking-wider text-slate-300">Parámetros</span>
+                  </div>
+                  <button 
+                    onClick={() => setIsMobileDrawerOpen(false)}
+                    className="p-2 text-slate-400 hover:text-white bg-slate-800/60 rounded-xl transition-colors active:scale-90"
+                    aria-label="Cerrar parámetros"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+                {/* Content */}
+                <div className="overflow-y-auto px-4 pb-8" style={{ maxHeight: 'calc(88vh - 80px)' }}>
+                  <InputsPanel 
+                    inputs={inputs} 
+                    updateInput={updateInput} 
+                  />
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+
         {/* Main Dashboard Area */}
         <main className="flex-1 overflow-y-auto custom-scrollbar bg-slate-950/40">
-          <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
+          <div className="max-w-6xl mx-auto px-3 py-4 sm:p-4 md:p-8 space-y-5 sm:space-y-8 pb-24 lg:pb-8">
             {/* Context Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
               <div>
-                <h1 className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-slate-500 flex items-center gap-3">
-                  <LayoutDashboard size={28} className="text-blue-500" />
+                <h1 className="text-xl sm:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-slate-500 flex items-center gap-2 sm:gap-3">
+                  <LayoutDashboard size={22} className="text-blue-500 sm:w-7 sm:h-7" />
                   Estado de tu Retiro
                 </h1>
-                <p className="text-slate-500 text-sm mt-1">Análisis detallado basado en tus parámetros actuales.</p>
+                <p className="text-slate-500 text-xs sm:text-sm mt-1">Análisis detallado basado en tus parámetros actuales.</p>
               </div>
               
-              <div className="flex items-center gap-3">
-                <span className="text-[10px] font-bold text-slate-500 bg-slate-800/50 px-3 py-1 rounded-full uppercase tracking-widest border border-slate-700/50">
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 bg-slate-800/50 px-2.5 sm:px-3 py-1 rounded-full uppercase tracking-widest border border-slate-700/50">
                   Valores ajustados <span className="text-slate-400">por inflación</span>
                 </span>
-                <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border ${
+                <span className={`text-[9px] sm:text-[10px] font-black px-2.5 sm:px-3 py-1 rounded-full uppercase tracking-widest border ${
                   results.estado === 'excelente' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
                   results.estado === 'alcanzable' ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
                   "bg-rose-500/10 text-rose-400 border-rose-500/20"
@@ -458,33 +581,34 @@ export default function Home() {
             <SummaryCards results={results} />
 
             {/* Visuals Rendering */}
-            <section className="space-y-6">
-              <div className="flex items-center justify-between px-2">
-                <div className="flex items-center gap-2">
-                  <LineChart size={18} className="text-blue-500" />
-                  <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">
-                    Proyección de Patrimonio
+            <section className="space-y-4 sm:space-y-6">
+              <div className="flex items-center justify-between px-1 sm:px-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <LineChart size={16} className="text-blue-500 sm:w-[18px] sm:h-[18px]" />
+                  <h2 className="text-[10px] sm:text-xs font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] text-slate-500">
+                    Proyección
+                    <span className="hidden sm:inline"> de Patrimonio</span>
                   </h2>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   {activeTab === "details" && (
                     <motion.button 
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.2 }}
                       onClick={handleExcelExport}
-                      className="flex items-center gap-2 px-3 py-1 bg-emerald-600/10 hover:bg-emerald-600/20 text-[10px] font-bold text-emerald-400 rounded-lg transition-all border border-emerald-500/20 uppercase tracking-wider"
+                      className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 bg-emerald-600/10 hover:bg-emerald-600/20 text-[9px] sm:text-[10px] font-bold text-emerald-400 rounded-lg transition-all border border-emerald-500/20 uppercase tracking-wider"
                     >
                       <FileSpreadsheet size={12} />
                       <span>Excel</span>
                     </motion.button>
                   )}
 
-                  <div className="flex bg-slate-900/50 p-1 rounded-xl border border-slate-800/50 backdrop-blur-sm">
+                  <div className="flex bg-slate-900/50 p-0.5 sm:p-1 rounded-xl border border-slate-800/50 backdrop-blur-sm">
                     <button 
                       onClick={() => setActiveTab("projection")}
-                      className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
+                      className={`px-2.5 sm:px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
                         activeTab === "projection" 
                           ? "bg-blue-600 text-white shadow-lg shadow-blue-900/20" 
                           : "text-slate-500 hover:text-slate-300"
@@ -494,7 +618,7 @@ export default function Home() {
                     </button>
                     <button 
                       onClick={() => setActiveTab("details")}
-                      className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
+                      className={`px-2.5 sm:px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${
                         activeTab === "details" 
                           ? "bg-blue-600 text-white shadow-lg shadow-blue-900/20" 
                           : "text-slate-500 hover:text-slate-300"
@@ -597,7 +721,7 @@ export default function Home() {
             {/* Scenario Insights */}
             <motion.div 
               layout
-              className="bg-gradient-to-br from-blue-600/10 via-slate-900/50 to-indigo-600/10 border border-blue-500/20 rounded-3xl p-8 flex flex-col md:flex-row gap-6 shadow-2xl relative overflow-hidden group"
+              className="bg-gradient-to-br from-blue-600/10 via-slate-900/50 to-indigo-600/10 border border-blue-500/20 rounded-2xl sm:rounded-3xl p-5 sm:p-8 flex flex-col md:flex-row gap-4 sm:gap-6 shadow-2xl relative overflow-hidden group"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl rounded-full -mr-16 -mt-16" />
               <div className="p-4 h-fit bg-blue-500/10 rounded-2xl text-blue-400 border border-blue-500/20 shadow-inner group-hover:scale-110 transition-transform">
@@ -619,8 +743,8 @@ export default function Home() {
             </motion.div>
             
             {/* SEO & Information Section */}
-            <section className="mt-16 space-y-12 border-t border-slate-900 pt-16">
-              <div className="grid md:grid-cols-2 gap-12">
+            <section className="mt-10 sm:mt-16 space-y-8 sm:space-y-12 border-t border-slate-900 pt-10 sm:pt-16">
+              <div className="grid md:grid-cols-2 gap-8 sm:gap-12">
                 <div className="space-y-4">
                   <h3 className="text-xl font-bold text-white flex items-center gap-2">
                     <Info size={20} className="text-blue-500" />

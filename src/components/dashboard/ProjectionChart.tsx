@@ -125,11 +125,12 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
   }, [data, retirementAge]);
 
   return (
-    <div className="h-[540px] w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl flex flex-col">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-semibold text-slate-200 flex items-center gap-2">
+    <div className="h-[420px] sm:h-[540px] w-full bg-slate-900 border border-slate-800 p-3 sm:p-6 rounded-xl sm:rounded-2xl shadow-xl flex flex-col">
+      <div className="flex justify-between items-center mb-3 sm:mb-6">
+        <h3 className="text-sm sm:text-lg font-semibold text-slate-200 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] animate-pulse" />
-          Evolución de Patrimonio y Escenarios de Sensibilidad
+          <span className="hidden sm:inline">Evolución de Patrimonio y Escenarios de Sensibilidad</span>
+          <span className="sm:hidden">Evolución de Patrimonio</span>
         </h3>
       </div>
       

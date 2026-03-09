@@ -73,45 +73,45 @@ export function SummaryCards({ results }: SummaryCardsProps) {
     }).format(val).replace('$', '').trim(); // Remove symbol to keep just the formatted number if needed, or keep it. The user has $ sign in the JSX usually. No, wait, in SummaryCards it is used in <p className="text-2xl font-bold text-slate-100">{formatCurrency(card.value)}</p>. So it will include the currency symbol of de-DE (which might be $ or USD). Let's use 'en-DE' or 'es-ES'. actually 'de-DE' with currency USD might put 'USD' or '$' at the end. Actually the user wants $ symbol. Let's manually do it for full control.
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <motion.div 
         layout
-        className={`${status.bg} p-6 rounded-2xl shadow-lg shadow-black/20 flex items-center gap-6 text-white`}
+        className={`${status.bg} p-4 sm:p-6 rounded-2xl shadow-lg shadow-black/20 flex items-center gap-3 sm:gap-6 text-white`}
       >
-        <div className="bg-white/20 p-3 rounded-full backdrop-blur-md">
+        <div className="bg-white/20 p-2 sm:p-3 rounded-full backdrop-blur-md shrink-0">
           {status.icon}
         </div>
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">{status.text}</h2>
-          <p className="opacity-90">{status.sub}</p>
+        <div className="min-w-0">
+          <h2 className="text-lg sm:text-2xl font-bold tracking-tight">{status.text}</h2>
+          <p className="opacity-90 text-xs sm:text-base leading-snug">{status.sub}</p>
         </div>
-        <div className="ml-auto text-right">
-          <div className="text-sm opacity-80 uppercase tracking-widest font-semibold">Años Cubiertos</div>
-          <div className="text-4xl font-black">{retiro.anosCubiertos}</div>
+        <div className="ml-auto text-right shrink-0">
+          <div className="text-[10px] sm:text-sm opacity-80 uppercase tracking-widest font-semibold">Años Cubiertos</div>
+          <div className="text-3xl sm:text-4xl font-black">{retiro.anosCubiertos}</div>
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {cards.map((card, i) => (
           <motion.div
             key={card.title}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-slate-900 border border-slate-800 p-5 rounded-2xl hover:border-slate-700 transition-colors shadow-sm"
+            className="bg-slate-900 border border-slate-800 p-3 sm:p-5 rounded-xl sm:rounded-2xl hover:border-slate-700 transition-colors shadow-sm"
           >
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-2 bg-slate-800 rounded-lg">
+            <div className="flex justify-between items-start mb-2 sm:mb-4">
+              <div className="p-1.5 sm:p-2 bg-slate-800 rounded-lg">
                 {card.icon}
               </div>
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-tighter">
+              <span className="text-[9px] sm:text-xs font-semibold text-slate-500 uppercase tracking-tighter hidden sm:block">
                 Preview
               </span>
             </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-medium text-slate-400">{card.title}</h3>
-              <p className="text-2xl font-bold text-slate-100">{formatCurrency(card.value)}</p>
-              <p className="text-xs text-slate-500">{card.description}</p>
+            <div className="space-y-0.5 sm:space-y-1">
+              <h3 className="text-[11px] sm:text-sm font-medium text-slate-400 leading-tight">{card.title}</h3>
+              <p className="text-lg sm:text-2xl font-bold text-slate-100">{formatCurrency(card.value)}</p>
+              <p className="text-[10px] sm:text-xs text-slate-500 leading-snug">{card.description}</p>
             </div>
           </motion.div>
         ))}
