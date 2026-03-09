@@ -312,19 +312,65 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
               />
             )}
 
-            {/* Ghost Lines for Preview Scenarios (legendType="none") */}
-            {previewScenarios?.map((scenario, idx) => {
-              const isStressed = scenario.dataKey === 'capitalTotalStressed';
-              const strokeColor = isStressed ? "#fbbf24" : "#ffffffff";
-              const currentDataKey = scenario.dataKey || "capitalTotal";
+            {/* Ghost Lines for Preview Scenarios — perpendicular label alignment */}
+            {(() => {
+              if (!previewScenarios || previewScenarios.length === 0) return null;
 
-              return (
+              const dataLen = previewScenarios[0].data.length;
+              const refIdx = Math.floor(dataLen * 0.75);
+              const slopeW = Math.min(10, refIdx, dataLen - 1 - refIdx);
+
+              // Gather value & slope at refIdx for each scenario
+              const entries = previewScenarios.map((scenario, idx) => {
+                const dk = scenario.dataKey || "capitalTotal";
+                const isStressed = dk === 'capitalTotalStressed';
+                const color = isStressed ? "#fbbf24" : "#ffffffff";
+                const val = (scenario.data[refIdx] as any)?.[dk] ?? 0;
+                const v0 = (scenario.data[Math.max(0, refIdx - slopeW)] as any)?.[dk] ?? val;
+                const v1 = (scenario.data[Math.min(dataLen - 1, refIdx + slopeW)] as any)?.[dk] ?? val;
+                const slope = (v1 - v0) / (2 * slopeW); // data units per index
+                return { idx, val, slope, scenario, dk, color, isStressed };
+              });
+
+              // Average slope & value at reference point
+              const avgSlope = entries.reduce((s, e) => s + e.slope, 0) / entries.length;
+              const avgVal = entries.reduce((s, e) => s + e.val, 0) / entries.length;
+
+              // Perpendicular label placement: compute index offset per data-value difference.
+              // Tangent in pixel space: T = (pxPerIdx, -slope * pxPerVal)
+              // Perpendicular (CCW): P = (slope * pxPerVal, pxPerIdx)
+              // Index offset for Δvalue: dIdx = -slope * pxPerVal² / pxPerIdx² * Δvalue
+              const pxPerIdx = 700 / dataLen;
+              const pxPerVal = 420 / (maxY || 1);
+              const perpFactor = -avgSlope * (pxPerVal * pxPerVal) / (pxPerIdx * pxPerIdx);
+
+              // Compute label index for each scenario along the perpendicular
+              const labelIndices = entries.map(e => {
+                const raw = refIdx + (e.val - avgVal) * perpFactor;
+                return Math.max(10, Math.min(dataLen - 25, Math.round(raw)));
+              });
+
+              // Fallback: enforce minimum index separation when perpendicular spread is too small
+              const sorted = entries
+                .map((e, i) => ({ origI: i, val: e.val, labelIdx: labelIndices[i] }))
+                .sort((a, b) => a.labelIdx - b.labelIdx);
+              const MIN_IDX_GAP = 12;
+              for (let i = 1; i < sorted.length; i++) {
+                if (sorted[i].labelIdx - sorted[i - 1].labelIdx < MIN_IDX_GAP) {
+                  sorted[i].labelIdx = sorted[i - 1].labelIdx + MIN_IDX_GAP;
+                }
+              }
+              sorted.forEach(s => {
+                labelIndices[s.origI] = Math.max(10, Math.min(dataLen - 25, s.labelIdx));
+              });
+
+              return entries.map(({ idx, scenario, dk, color, isStressed }, i) => (
                 <Line
                   key={`preview-${idx}`}
-                  data={scenario.data.map((d, i) => ({ ...d, index: i }))}
+                  data={scenario.data.map((d, j) => ({ ...d, index: j }))}
                   type="monotone"
-                  dataKey={currentDataKey}
-                  stroke={strokeColor}
+                  dataKey={dk}
+                  stroke={color}
                   strokeWidth={1.5}
                   strokeOpacity={isStressed ? 0.4 : 0.2}
                   strokeDasharray="4 2"
@@ -333,16 +379,16 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
                   legendType="none"
                 >
                   <LabelList
-                    dataKey={currentDataKey}
+                    dataKey={dk}
                     position="top"
                     content={(props: any) => {
                       const { x, y, index } = props;
-                      if (index === Math.floor(scenario.data.length * 0.75)) {
+                      if (index === labelIndices[i]) {
                         return (
                           <text
                             x={x}
-                            y={y - 12}
-                            fill={strokeColor}
+                            y={y - 10}
+                            fill={color}
                             fontSize={9}
                             fontWeight="bold"
                             textAnchor="middle"
@@ -356,8 +402,8 @@ export const ProjectionChart = React.memo(({ data, retirementAge, previewScenari
                     }}
                   />
                 </Line>
-              );
-            })}
+              ));
+            })()}
 
           {/* Vertical Divider - Start of Retirement */}
           {retirementIndex !== null && (
